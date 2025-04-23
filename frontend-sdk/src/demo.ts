@@ -1,41 +1,17 @@
-import LoanEligibilitySDK from './index';
-
-// Initialize SDK
-const eligibilitySDK = LoanEligibilitySDK.initialize({
-    partnerId: 'acme_bank',
-    partnerName: 'Acme Bank App',
-    // authToken: 'partner_auth_token_123',
-    theme: {
-        primaryColor: '#3366cc',
-        fontFamily: 'Arial'
-    },
-    environment: 'sandbox'
+import LoanEligibilitySDK from "./sdk";
+const VITE_SDK_KEY="sdk_test_6ee7e179854e3528d81425040e7409d8"
+const VITE_SDK_SECRET="secret_test_7971810b6de99f626eb580af6c24b5f7"
+const sdk = new LoanEligibilitySDK({
+  apiKey: VITE_SDK_KEY,
+  apiSecret: VITE_SDK_SECRET,
+  partnerId: "1234567890",
 });
 
-// Set up event handlers
-eligibilitySDK.on('ready', () => {
-    console.log('Eligibility checker is ready');
-    
-    // Optionally pre-fill some user data
-    eligibilitySDK.sendData({
-        name: 'John Doe',
-        email: 'john@example.com'
-    });
+sdk.initialize({
+  apiKey: VITE_SDK_KEY,
+  apiSecret: VITE_SDK_SECRET,
+  partnerId: "1234567890",
 });
 
-eligibilitySDK.on('completed', (result) => {
-    console.log('Eligibility result:', result);
-});
 
-eligibilitySDK.on('error', (error) => {
-    console.error('Error occurred:', error);
-});
 
-eligibilitySDK.on('closed', () => {
-    console.log('Eligibility checker closed');
-});
-
-// Button click handler
-document.getElementById("check-eligibility")?.addEventListener("click", () => {
-  eligibilitySDK.openEligibilityCheck("popup");
-});

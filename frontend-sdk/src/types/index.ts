@@ -7,15 +7,20 @@ export type EligibilityResult = {
 };
 
 export type PartnerConfig = {
-  partnerId: string;
+  partnerId?: string;
   partnerName?: string;
   userId?: string;
   userData?: Record<string, unknown>;
+  sessionId?: string;
   theme?: {
       primaryColor?: string;
       secondaryColor?: string;
       fontFamily?: string;
+      logoUrl?: string;
+      name?: string;
   };
+  apiKey: string;
+  apiSecret: string;
   environment?: 'sandbox' | 'production';
 };
 

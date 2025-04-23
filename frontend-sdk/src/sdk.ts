@@ -1,3 +1,4 @@
+import { SDK_API_URL, SDK_URL } from "./config/constants";
 import {
   PartnerConfig,
   EligibilityResult,
@@ -5,31 +6,86 @@ import {
   EventHandler,
   SDKError,
 } from "./types";
+import axios from "axios";
 
 class LoanEligibilitySDK {
   private config: PartnerConfig;
   private iframe?: HTMLIFrameElement;
   private eventHandlers: Map<SDKEvent, Set<EventHandler>> = new Map();
-  private iframeUrl: string;
+  private iframeUrl: string = "";
   private sessionToken: string = "";
   private static instance: LoanEligibilitySDK | null = null;
 
   constructor(config: PartnerConfig) {
     this.config = config;
-    this.iframeUrl = this.generateIframeUrl();
-    this.validateConfig();
+    // this.iframeUrl = this.generateIframeUrl();
+    // this.validateConfig();
     this.generateSessionToken();
-    this.setupMessageListener();
+    // this.setupMessageListener();  // comment this as of now
   }
 
-  public static initialize(config: PartnerConfig): LoanEligibilitySDK {
-    if (this.instance) {
-      console.warn("SDK already initialized. Returning existing instance.");
-      return this.instance;
-    }
+  public async initialize(config: PartnerConfig): Promise<void> {
+    try {
+      // Validate required configuration
+      if (!this.config.apiKey || !this.config.apiSecret) {
+        throw new Error(
+          "Missing required configuration: apiKey and apiSecret are required"
+        );
+      }
 
-    this.instance = new LoanEligibilitySDK(config);
-    return this.instance;
+      // Make API request
+      const response = await axios.get(`${SDK_API_URL}/loan-sdk/init`, {
+        headers: {
+          "X-SDK-Key": this.config.apiKey,
+          "X-SDK-Secret": this.config.apiSecret,
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": true,
+        },
+        timeout: 10000, // 10 seconds timeout
+      });
+      // Validate response structure
+      if (
+        !response.data ||
+        !response.data.sessionId ||
+        !response.data.themeConfig
+      ) {
+        throw new Error("Invalid response structure from initialization API");
+      }
+
+      // Update configuration
+      this.config = {
+        ...this.config,
+        theme: response.data.themeConfig,
+        sessionId: response.data.sessionId,
+        partnerName: response.data.partnerName,
+        partnerId: response.data.partnerId,
+      };
+
+      this.iframeUrl = this.generateIframeUrl();
+    } catch (error: any) {
+      console.log("error", error);
+      let errorMessage = "Failed to initialize SDK";
+
+      if (axios.isAxiosError(error)) {
+        // Handle Axios-specific errors
+        if (error.response) {
+          // Server responded with a status code outside 2xx
+          errorMessage += `: ${error.response.status} - ${error.response.data?.message || "No error message"}`;
+        } else if (error.request) {
+          // Request was made but no response received
+          errorMessage += ": No response received from server";
+        } else {
+          // Something happened in setting up the request
+          errorMessage += `: ${error.message}`;
+        }
+      } else if (error instanceof Error) {
+        // Handle other Error types
+        errorMessage += `: ${error.message}`;
+      }
+
+      console.error(errorMessage, error);
+      throw new Error(errorMessage);
+    }
   }
 
   private validateConfig(): void {
@@ -75,18 +131,18 @@ class LoanEligibilitySDK {
   }
 
   private generateIframeUrl(): string {
-    // https://provider.com/sdk/eligibility-check?partnerId=your_partner_id&sessionToken=
-    const baseUrl =
-      this.config.environment === "sandbox"
-        ? "http://localhost:5173"
-        : "http://localhost:5173";
+    const baseUrl = this.config.environment === "sandbox" ? SDK_URL : SDK_URL;
 
     const params = new URLSearchParams();
-    params.append("partnerId", this.config.partnerId);
+    params.append("authKey", this.config.apiKey);
     // params.append("sessionToken", this.sessionToken);
 
-    if (this.config.userId) {
-      params.append("userId", this.config.userId);
+    if (this.config.apiSecret) {
+      params.append("authSecret", this.config.apiSecret);
+    }
+
+    if (this.config.sessionId) {
+      params.append("sessionId", this.config.sessionId);
     }
 
     if (this.config.theme) {
@@ -95,18 +151,44 @@ class LoanEligibilitySDK {
     return `${baseUrl}?${params.toString()}`;
   }
 
-  public openEligibilityCheck(mode: "iframe" | "popup"): void {
+  public openEligibilityCheck(mode: "popup"): void {
     if (mode === "popup") {
       window.open(
         this.iframeUrl,
         "_blank",
         "width=500,height=700,scrollbars=yes"
       );
-      return;
-    }
 
-    if (this.iframe) {
-      console.warn("Eligibility check is already open");
+      // const checkLoaded = setInterval(() => {
+      //   try {
+      //     if (!popupWindow) return;
+
+      //     // Send data securely via postMessage
+      //     popupWindow?.postMessage(
+      //       {
+      //         type: "SDK_INIT",
+      //         config: {
+      //           apiKey: this.config.apiKey,
+      //           apiSecret: this.config.apiSecret,
+      //           partnerId: this.config.partnerId,
+      //           sessionId: this.config.sessionId,
+      //           userId: this.config.userId,
+      //           theme: this.config.theme,
+      //         },
+      //       },
+      //       new URL(this.iframeUrl).origin
+      //     );
+
+      //     clearInterval(checkLoaded);
+      //   } catch (e) {
+      //     // Window not ready yet or closed
+      //     if (popupWindow?.closed) {
+      //       clearInterval(checkLoaded);
+      //       throw new Error("Popup window was closed");
+      //     }
+      //   }
+      // }, 100);
+
       return;
     }
 
@@ -176,3 +258,4 @@ class LoanEligibilitySDK {
 }
 
 export default LoanEligibilitySDK;
+

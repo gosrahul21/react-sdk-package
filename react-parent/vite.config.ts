@@ -9,5 +9,6 @@ export default defineConfig({
       // Allow embedding in iframes from any origin during development
       "Content-Security-Policy": "frame-ancestors *;",
     },
+    port: 3001,
   },
 });

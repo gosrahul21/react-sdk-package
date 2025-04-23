@@ -3,30 +3,31 @@ import LoanEligibilitySDK from "frontend-sdk";
 import "./App.css";
 
 // Types for better type safety
-type SDKStatus = 
-  | 'idle'
-  | 'loading'
-  | 'success'
-  | 'error'
-  | 'completed';
+type SDKStatus = "idle" | "loading" | "success" | "error" | "completed";
 
 function App() {
   const [sdk, setSdk] = useState<LoanEligibilitySDK | null>(null);
-  const [status, setStatus] = useState<SDKStatus>('idle');
+  const [status, setStatus] = useState<SDKStatus>("idle");
   const [message, setMessage] = useState("Check Eligibility");
   const [error, setError] = useState<string | null>(null);
-  console.log("sdk key", import.meta.env.VITE_SDK_KEY);
 
   // Initialize SDK
   useEffect(() => {
     try {
       const sdkInstance = new LoanEligibilitySDK({
-        partnerId: import.meta.env.VITE_SDK_KEY
+        apiKey: import.meta.env.VITE_SDK_KEY,
+        apiSecret: import.meta.env.VITE_SDK_SECRET,
+      });
+      sdkInstance.initialize({
+        partnerId: import.meta.env.VITE_PARTNER_ID,
+        apiKey: import.meta.env.VITE_SDK_KEY,
+        apiSecret: import.meta.env.VITE_SDK_SECRET,
       });
 
+      // sdkInstance.openEligibilityCheck("popup");
       // Set up event handlers
       sdkInstance.on("initiated", () => {
-        setStatus('loading');
+        setStatus("loading");
         setMessage("Loading eligibility check...");
       });
 
@@ -35,22 +36,22 @@ function App() {
       });
 
       sdkInstance.on("completed", (result: any) => {
-        setStatus('completed');
+        setStatus("completed");
         setMessage("Eligibility check complete!");
         console.log("Eligibility result:", result);
       });
 
       sdkInstance.on("error", (err: any) => {
-        setStatus('error');
+        setStatus("error");
         setError(err.message || "An error occurred");
         setMessage("Try Again");
         console.error("SDK Error:", err);
       });
 
       sdkInstance.on("closed", () => {
-        if (status !== 'completed') {
+        if (status !== "completed") {
           setMessage("Check Eligibility");
-          setStatus('idle');
+          setStatus("idle");
         }
       });
 
@@ -65,7 +66,7 @@ function App() {
         sdkInstance.off("closed", () => {});
       };
     } catch (err) {
-      setStatus('error');
+      setStatus("error");
       setError("Failed to initialize SDK");
       console.error("Initialization error:", err);
     }
@@ -81,7 +82,7 @@ function App() {
       setError(null);
       sdk.openEligibilityCheck("popup");
     } catch (err) {
-      setStatus('error');
+      setStatus("error");
       setError("Failed to open eligibility check");
       console.error("Open error:", err);
     }
@@ -90,14 +91,14 @@ function App() {
   // Button state management
   const getButtonClass = () => {
     switch (status) {
-      case 'loading':
-        return 'button loading';
-      case 'error':
-        return 'button error';
-      case 'completed':
-        return 'button success';
+      case "loading":
+        return "button loading";
+      case "error":
+        return "button error";
+      case "completed":
+        return "button success";
       default:
-        return 'button';
+        return "button";
     }
   };
 
@@ -115,9 +116,9 @@ function App() {
           <button
             onClick={handleClick}
             className={getButtonClass()}
-            disabled={status === 'loading'}
+            disabled={status === "loading"}
           >
-            {status === 'loading' ? (
+            {status === "loading" ? (
               <>
                 <span className="spinner"></span>
                 {message}
@@ -126,15 +127,15 @@ function App() {
               message
             )}
           </button>
-          
+
           {error && (
             <div className="error-message">
               <p>{error}</p>
-              {status === 'error' && (
-                <button 
+              {status === "error" && (
+                <button
                   onClick={() => {
                     setError(null);
-                    setStatus('idle');
+                    setStatus("idle");
                   }}
                   className="button retry"
                 >
@@ -144,7 +145,7 @@ function App() {
             </div>
           )}
 
-          {status === 'completed' && (
+          {status === "completed" && (
             <div className="success-message">
               <p>✓ Eligibility check completed successfully</p>
               <p className="small">Check your console for detailed results</p>
