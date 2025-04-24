@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-interface Step4Props {
+interface VerifyPanProps {
   mobileNumber: string;
+  panNumber: string;
+  setPanNumber: (panNumber: string) => void;
   sessionId: string;
   onSuccess: (data: any) => void;
   onBack?: () => void;
 }
 
-export default function Step4({ mobileNumber, sessionId, onSuccess, onBack }: Step4Props) {
-  const [panNumber, setPanNumber] = useState('');
+export default function VerifyPan({ mobileNumber,panNumber, setPanNumber, sessionId, onSuccess, onBack }: VerifyPanProps) {
+  // const [panNumber, setPanNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [panMismatch, setPanMismatch] = useState(false);

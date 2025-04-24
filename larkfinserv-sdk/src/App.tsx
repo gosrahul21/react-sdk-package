@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import VerifyPhoneStep1 from "./components/VerifyPhoneStep1";
 import Step2 from "./components/Step2";
 import Step3 from "./components/Step3";
-import Step4 from "./components/Step4";
-import Step5 from "./components/Step5";
+import VerifyPan from "./components/VerifyPan";
 import Step6 from "./components/Step6";
+import MFCentralResponseStep from "./components/MFCentralResponseStep";
 
 const LoanEligibilityFlow = () => {
   const [step, setStep] = useState(1);
@@ -17,35 +17,104 @@ const LoanEligibilityFlow = () => {
   const [panNumber, setPanNumber] = useState("");
   const [_panVerified, setPanVerified] = useState(false);
   const [panMismatch, setPanMismatch] = useState(false);
-  const [hasInvestments, setHasInvestments] = useState(true);
+  // const [hasInvestments, setHasInvestments] = useState(true);
   const [lenders, setLenders] = useState<any>([]);
-  const [bestOffer, setBestOffer] = useState<any>(null);
-  const [showOfferDetails, setShowOfferDetails] = useState(false);
-
-  // Mock data for offers
-  const mockOffers = [
-    {
-      lender: "ABC Bank",
-      loanAmount: "₹5,00,000",
-      roi: "10.5%",
-      processingFee: "1.5%",
-      tenure: "36 months",
-      eligibleInvestments: [
-        "Axis Bluechip Fund",
-        "ICICI Prudential Equity Fund",
-      ],
-      nonEligibleInvestments: ["SBI Small Cap Fund"],
-    },
-    {
-      lender: "XYZ Finance",
-      loanAmount: "₹4,50,000",
-      roi: "11.2%",
-      processingFee: "1.2%",
-      tenure: "24 months",
-      eligibleInvestments: ["Axis Bluechip Fund", "Parag Parikh Flexi Cap"],
-      nonEligibleInvestments: ["Nippon India Small Cap Fund"],
-    },
-  ];
+  const [portfolioData, setPortfolioData] = useState<any>();
+  //   {
+  //   totalPortfolioValue: 150000,
+  //   totalEligibleValue: 120000,
+  //   bestOffers: [
+  //     {
+  //       lenderId: "550e8400-e29b-41d4-a716-446655440000",
+  //       lenderName: "HDFC Bank",
+  //       lenderCode: "HDFC",
+  //       maxLoanAmount: 90000,
+  //       interestRateRange: {
+  //         min: 12.5,
+  //         max: 14,
+  //       },
+  //       processingFee: 1,
+  //       tenureRange: {
+  //         min: 3,
+  //         max: 36,
+  //       },
+  //     },
+  //     {
+  //       lenderId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+  //       lenderName: "ICICI Bank",
+  //       lenderCode: "ICICI",
+  //       maxLoanAmount: 85000,
+  //       interestRateRange: {
+  //         min: 13,
+  //         max: 15,
+  //       },
+  //       processingFee: 1.5,
+  //       tenureRange: {
+  //         min: 6,
+  //         max: 48,
+  //       },
+  //     },
+  //   ],
+  //   holdings: [
+  //     {
+  //       schemeCode: "HDFC500",
+  //       schemeName: "HDFC Top 100 Fund",
+  //       isin: "INF179K01BE2",
+  //       units: 500.235,
+  //       nav: 150.43,
+  //       currentValue: 75250.85,
+  //       eligibility: [
+  //         {
+  //           lenderId: "550e8400-e29b-41d4-a716-446655440000",
+  //           lenderName: "HDFC Bank",
+  //           loanToValueRatio: 75,
+  //           maxLoanAmount: 56438.14,
+  //           assetType: "EQUITY",
+  //         },
+  //         {
+  //           lenderId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+  //           lenderName: "ICICI Bank",
+  //           loanToValueRatio: 70,
+  //           maxLoanAmount: 52675.6,
+  //           assetType: "EQUITY",
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       schemeCode: "ICICI100",
+  //       schemeName: "ICICI Prudential Bluechip Fund",
+  //       isin: "INF109K01BF1",
+  //       units: 800.125,
+  //       nav: 93.45,
+  //       currentValue: 74771.68,
+  //       eligibility: [
+  //         {
+  //           lenderId: "550e8400-e29b-41d4-a716-446655440000",
+  //           lenderName: "HDFC Bank",
+  //           loanToValueRatio: 80,
+  //           maxLoanAmount: 59817.34,
+  //           assetType: "EQUITY",
+  //         },
+  //         {
+  //           lenderId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+  //           lenderName: "ICICI Bank",
+  //           loanToValueRatio: 75,
+  //           maxLoanAmount: 56078.76,
+  //           assetType: "EQUITY",
+  //         },
+  //       ],
+  //     },
+  //   ],
+  //   summary: [
+  //     {
+  //       assetType: "EQUITY",
+  //       totalValue: 150022.53,
+  //       totalEligibleValue: 120000,
+  //       fundCount: 2,
+  //       eligibleFundCount: 2,
+  //     },
+  //   ],
+  // }
 
   // const handleCheckEligibility = () => {
   //   // In a real app, this would call an API to send OTP
@@ -73,7 +142,7 @@ const LoanEligibilityFlow = () => {
     } else {
       setPanVerified(true);
       // 30% chance user has no investments
-      setHasInvestments(Math.random() > 0.3);
+      // setHasInvestments(Math.random() > 0.3);
       setStep(5);
     }
   };
@@ -83,21 +152,21 @@ const LoanEligibilityFlow = () => {
     setStep(6);
   };
 
-  useEffect(() => {
-    if (step === 5 && hasInvestments) {
-      handleFlowComplete();
-      // Simulate API call to get lenders
-      setTimeout(() => {
-        setLenders(mockOffers);
-        // Find best offer (simple comparison by ROI)
-        const best = mockOffers.reduce((prev, current) =>
-          parseFloat(prev.roi) < parseFloat(current.roi) ? prev : current
-        );
-        setBestOffer(best);
-        setStep(6);
-      }, 1500);
-    }
-  }, [step, hasInvestments]);
+  // useEffect(() => {
+  //   if (step === 5) {
+  //     // handleFlowComplete();
+  //     // Simulate API call to get lenders
+  //     setTimeout(() => {
+  //       setLenders(mockOffers);
+  //       // Find best offer (simple comparison by ROI)
+  //       const best = mockOffers.reduce((prev, current) =>
+  //         parseFloat(prev.roi) < parseFloat(current.roi) ? prev : current
+  //       );
+  //       setBestOffer(best);
+  //       setStep(6);
+  //     }, 1500);
+  //   }
+  // }, [step, hasInvestments]);
 
   useEffect(() => {
     // Add this to your child application's initialization code
@@ -149,14 +218,17 @@ const LoanEligibilityFlow = () => {
     const apiKey = params.get("authKey");
     const apiSecret = params.get("authSecret");
 
-    sessionStorage.setItem("sdkCredentials", JSON.stringify({
-      sessionId,
-      partnerId,
-      userId,
-      theme,
-      apiKey,
-      apiSecret,
-    }));
+    sessionStorage.setItem(
+      "sdkCredentials",
+      JSON.stringify({
+        sessionId,
+        partnerId,
+        userId,
+        theme,
+        apiKey,
+        apiSecret,
+      })
+    );
 
     // console.log("sdkCredentials new", { sessionId, partnerId, userId, theme, apiKey, apiSecret });
     initializeChildApp({
@@ -167,7 +239,6 @@ const LoanEligibilityFlow = () => {
       apiKey,
       apiSecret,
     });
-
   }, []);
 
   const [childAppConfig, setChildAppConfig] = useState<any>(null);
@@ -191,6 +262,11 @@ const LoanEligibilityFlow = () => {
     } else {
       alert("Proceeding to loan application");
     }
+  };
+
+  const handlePortfolioData = (portfolioData: any) => {
+    setPortfolioData(portfolioData);
+    setStep(6);
   };
 
   return (
@@ -249,7 +325,9 @@ const LoanEligibilityFlow = () => {
         )}
         {/* Step 4: PAN Input */}
         {step === 4 && (
-          <Step4
+          <VerifyPan
+            panNumber={panNumber}
+            setPanNumber={setPanNumber}
             mobileNumber={mobileNumber}
             sessionId={childAppConfig?.sessionId}
             onSuccess={() => {
@@ -257,12 +335,17 @@ const LoanEligibilityFlow = () => {
             }}
           />
         )}
-        {step === 5 && !hasInvestments && (
-          <Step5 onConfirm={() => setStep(6)} onBack={() => setStep(4)} />
+        {step === 5 && (
+          <MFCentralResponseStep
+            mobileNumber={mobileNumber}
+            panNumber={panNumber}
+            onConfirm={(data: any) => handlePortfolioData(data)}
+            onBack={() => setStep(4)}
+          />
         )}
-        {step === 6 && (
+        {step === 6 && portfolioData && (
           <Step6
-            lenders={lenders}
+            portfolioData={portfolioData}
             onProceed={() => alert("Proceeding to loan application")}
             mobileNumber={mobileNumber}
           />
