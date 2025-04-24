@@ -18,11 +18,6 @@ function App() {
         apiKey: import.meta.env.VITE_SDK_KEY,
         apiSecret: import.meta.env.VITE_SDK_SECRET,
       });
-      sdkInstance.initialize({
-        partnerId: import.meta.env.VITE_PARTNER_ID,
-        apiKey: import.meta.env.VITE_SDK_KEY,
-        apiSecret: import.meta.env.VITE_SDK_SECRET,
-      });
 
       // sdkInstance.openEligibilityCheck("popup");
       // Set up event handlers
@@ -72,7 +67,7 @@ function App() {
     }
   }, []);
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (!sdk) {
       setError("SDK not initialized");
       return;
@@ -80,6 +75,11 @@ function App() {
 
     try {
       setError(null);
+      await sdk.initialize({
+        partnerId: import.meta.env.VITE_PARTNER_ID,
+        apiKey: import.meta.env.VITE_SDK_KEY,
+        apiSecret: import.meta.env.VITE_SDK_SECRET,
+      });
       sdk.openEligibilityCheck("popup");
     } catch (err) {
       setStatus("error");
