@@ -45,9 +45,9 @@ const Step6: React.FC<Step6Props> = ({ portfolioData, onProceed }) => {
   );
 
   return (
-    <div className="flex flex-col h-[100vh] max-w-xl mx-auto bg-gray-50">
+    <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50">
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-scroll p-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Loan Eligibility & Offers</h2>
 
         {/* Portfolio Summary */}
@@ -145,8 +145,7 @@ const Step6: React.FC<Step6Props> = ({ portfolioData, onProceed }) => {
         </div>
       </div>
 
-      {/* Sticky Footer */}
-      <div className="border-t bg-white p-4 shadow-inner">
+      <div className="flex-[0.3] border-t border-gray-300 bg-white p-4 shadow-inner">
         <button
           disabled={!selectedOffer}
           onClick={() => selectedOffer && onProceed(selectedOffer)}

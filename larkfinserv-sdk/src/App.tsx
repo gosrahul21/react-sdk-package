@@ -20,153 +20,12 @@ const LoanEligibilityFlow = () => {
   // const [hasInvestments, setHasInvestments] = useState(true);
   const [lenders, setLenders] = useState<any>([]);
   const [portfolioData, setPortfolioData] = useState<any>();
-  //   {
-  //   totalPortfolioValue: 150000,
-  //   totalEligibleValue: 120000,
-  //   bestOffers: [
-  //     {
-  //       lenderId: "550e8400-e29b-41d4-a716-446655440000",
-  //       lenderName: "HDFC Bank",
-  //       lenderCode: "HDFC",
-  //       maxLoanAmount: 90000,
-  //       interestRateRange: {
-  //         min: 12.5,
-  //         max: 14,
-  //       },
-  //       processingFee: 1,
-  //       tenureRange: {
-  //         min: 3,
-  //         max: 36,
-  //       },
-  //     },
-  //     {
-  //       lenderId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-  //       lenderName: "ICICI Bank",
-  //       lenderCode: "ICICI",
-  //       maxLoanAmount: 85000,
-  //       interestRateRange: {
-  //         min: 13,
-  //         max: 15,
-  //       },
-  //       processingFee: 1.5,
-  //       tenureRange: {
-  //         min: 6,
-  //         max: 48,
-  //       },
-  //     },
-  //   ],
-  //   holdings: [
-  //     {
-  //       schemeCode: "HDFC500",
-  //       schemeName: "HDFC Top 100 Fund",
-  //       isin: "INF179K01BE2",
-  //       units: 500.235,
-  //       nav: 150.43,
-  //       currentValue: 75250.85,
-  //       eligibility: [
-  //         {
-  //           lenderId: "550e8400-e29b-41d4-a716-446655440000",
-  //           lenderName: "HDFC Bank",
-  //           loanToValueRatio: 75,
-  //           maxLoanAmount: 56438.14,
-  //           assetType: "EQUITY",
-  //         },
-  //         {
-  //           lenderId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-  //           lenderName: "ICICI Bank",
-  //           loanToValueRatio: 70,
-  //           maxLoanAmount: 52675.6,
-  //           assetType: "EQUITY",
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       schemeCode: "ICICI100",
-  //       schemeName: "ICICI Prudential Bluechip Fund",
-  //       isin: "INF109K01BF1",
-  //       units: 800.125,
-  //       nav: 93.45,
-  //       currentValue: 74771.68,
-  //       eligibility: [
-  //         {
-  //           lenderId: "550e8400-e29b-41d4-a716-446655440000",
-  //           lenderName: "HDFC Bank",
-  //           loanToValueRatio: 80,
-  //           maxLoanAmount: 59817.34,
-  //           assetType: "EQUITY",
-  //         },
-  //         {
-  //           lenderId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-  //           lenderName: "ICICI Bank",
-  //           loanToValueRatio: 75,
-  //           maxLoanAmount: 56078.76,
-  //           assetType: "EQUITY",
-  //         },
-  //       ],
-  //     },
-  //   ],
-  //   summary: [
-  //     {
-  //       assetType: "EQUITY",
-  //       totalValue: 150022.53,
-  //       totalEligibleValue: 120000,
-  //       fundCount: 2,
-  //       eligibleFundCount: 2,
-  //     },
-  //   ],
-  // }
 
-  // const handleCheckEligibility = () => {
-  //   // In a real app, this would call an API to send OTP
-  //   setOtpSent(true);
-  //   // Mock user existence check - 50% chance user exists
-  //   setUserExists(Math.random() > 0.5);
-  //   setStep(2);
-  // };
-
-  const handleVerifyOtp = () => {
-    // In a real app, this would verify OTP with backend
-    setOtpVerified(true);
-    setStep(3);
-  };
 
   const handleUserIntent = (intent: string) => {
     setUserIntent(intent);
     // setStep(4);
   };
-
-  const handlePanSubmit = () => {
-    // Mock verification - 20% chance of mismatch
-    if (Math.random() < 0.2) {
-      setPanMismatch(true);
-    } else {
-      setPanVerified(true);
-      // 30% chance user has no investments
-      // setHasInvestments(Math.random() > 0.3);
-      setStep(5);
-    }
-  };
-
-  const handleConfirmNoInvestments = () => {
-    // Proceed with loan application despite no investments
-    setStep(6);
-  };
-
-  // useEffect(() => {
-  //   if (step === 5) {
-  //     // handleFlowComplete();
-  //     // Simulate API call to get lenders
-  //     setTimeout(() => {
-  //       setLenders(mockOffers);
-  //       // Find best offer (simple comparison by ROI)
-  //       const best = mockOffers.reduce((prev, current) =>
-  //         parseFloat(prev.roi) < parseFloat(current.roi) ? prev : current
-  //       );
-  //       setBestOffer(best);
-  //       setStep(6);
-  //     }, 1500);
-  //   }
-  // }, [step, hasInvestments]);
 
   useEffect(() => {
     // Add this to your child application's initialization code
@@ -271,7 +130,7 @@ const LoanEligibilityFlow = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
+      <div className="max-w-md mx-auto bg-white rounded-xl h-[100vh] shadow-md overflow-hidden p-6">
         {/* Progress indicator */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
