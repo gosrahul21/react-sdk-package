@@ -21,7 +21,6 @@ const LoanEligibilityFlow = () => {
   const [lenders, setLenders] = useState<any>([]);
   const [portfolioData, setPortfolioData] = useState<any>();
 
-
   const handleUserIntent = (intent: string) => {
     setUserIntent(intent);
     // setStep(4);
@@ -207,6 +206,7 @@ const LoanEligibilityFlow = () => {
             portfolioData={portfolioData}
             onProceed={() => alert("Proceeding to loan application")}
             mobileNumber={mobileNumber}
+            sessionId={childAppConfig?.sessionId}
           />
         )}
       </div>
