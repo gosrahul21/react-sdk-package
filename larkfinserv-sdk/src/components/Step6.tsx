@@ -9,7 +9,7 @@ interface Eligibility {
   assetType: string;
 }
 
-interface Holding {
+interface Fund {
   schemeCode: string;
   schemeName: string;
   isin: string;
@@ -17,13 +17,16 @@ interface Holding {
   nav: number;
   currentValue: number;
   eligibility: Eligibility[];
+  lienMarked?: number;
+  reason?: string;
 }
 
 interface PortfolioData {
   totalPortfolioValue: number;
   totalEligibleValue: number;
   processedLoanAmount?: number;
-  holdings: Holding[];
+  eligibleFunds: Fund[];
+  notEligibleFunds: Fund[];
   bestOffers: {
     lenderId: string;
     lenderName: string;
@@ -45,7 +48,10 @@ interface PortfolioData {
     totalEligibleValue: number;
     fundCount: number;
     eligibleFundCount: number;
+    notEligibleFundCount: number;
+    lienMarked?: number;
   }[];
+  holdings?: Fund[];
 }
 
 interface Step6Props {
@@ -61,12 +67,19 @@ const Step6: React.FC<Step6Props> = ({
   mobileNumber,
   sessionId,
 }) => {
+  const allHoldings = portfolioData.holdings || [];
+  const eligibleFunds =
+    portfolioData.eligibleFunds ||
+    allHoldings.filter((h) => h.eligibility.length > 0);
+  const notEligibleFunds =
+    portfolioData.notEligibleFunds ||
+    allHoldings.filter((h) => h.eligibility.length === 0);
+
   const {
     totalPortfolioValue,
     totalEligibleValue,
     processedLoanAmount,
-    holdings = [],
-    bestOffers,
+    bestOffers = [],
     summary = [],
   } = portfolioData;
 
@@ -80,6 +93,9 @@ const Step6: React.FC<Step6Props> = ({
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedHolding, setExpandedHolding] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"eligible" | "nonEligible">(
+    "eligible"
+  );
 
   const toggleHoldingExpansion = (schemeCode: string) => {
     setExpandedHolding(expandedHolding === schemeCode ? null : schemeCode);
@@ -241,6 +257,15 @@ const Step6: React.FC<Step6Props> = ({
                         {asset.totalValue.toLocaleString()} (₹
                         {asset.totalEligibleValue.toLocaleString()} eligible)
                       </p>
+                      <p className="text-xs mt-1">
+                        {asset.eligibleFundCount} eligible,{" "}
+                        {asset.notEligibleFundCount} not eligible
+                        {asset.lienMarked ? (
+                          <span>
+                            , ₹{asset.lienMarked.toLocaleString()} lien marked
+                          </span>
+                        ) : null}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -248,139 +273,136 @@ const Step6: React.FC<Step6Props> = ({
             )}
           </div>
 
-          {/* Holdings Section */}
+          {/* Holdings Section with Tabs */}
           <div className="border border-gray-200 rounded-lg p-4 bg-white mb-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">
-              Your Holdings
-            </h3>
-            <div className="space-y-3">
-              {holdings.map((holding) => (
-                <div
-                  key={holding.schemeCode}
-                  className="border-b border-gray-100 pb-3 last:border-0 last:pb-0"
-                >
-                  <div
-                    className="flex justify-between items-center cursor-pointer"
-                    onClick={() => toggleHoldingExpansion(holding.schemeCode)}
-                  >
-                    <div>
-                      <h4 className="font-medium text-gray-800">
-                        {holding.schemeName}
-                      </h4>
-                      <p className="text-sm text-gray-500">
-                        {holding.units.toFixed(2)} units @ ₹{holding.nav}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">
-                        ₹{holding.currentValue.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {(
-                          (holding.eligibility[0]?.maxLoanAmount /
-                            holding.currentValue) *
-                          100
-                        ).toFixed(0)}
-                        % LTV
-                      </p>
-                    </div>
-                  </div>
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-200 mb-3">
+              <button
+                className={`py-2 px-4 font-medium ${
+                  activeTab === "eligible"
+                    ? "text-green-600 border-b-2 border-green-600"
+                    : "text-gray-500"
+                }`}
+                onClick={() => setActiveTab("eligible")}
+              >
+                Eligible Funds ({eligibleFunds.length})
+              </button>
+              <button
+                className={`py-2 px-4 font-medium ${
+                  activeTab === "nonEligible"
+                    ? "text-green-600 border-b-2 border-green-600"
+                    : "text-gray-500"
+                }`}
+                onClick={() => setActiveTab("nonEligible")}
+              >
+                Non-Eligible Funds ({notEligibleFunds.length})
+              </button>
+            </div>
 
-                  {expandedHolding === holding.schemeCode && (
-                    <div className="mt-2 pl-2 border-l-2 border-green-200">
-                      <h5 className="text-sm font-medium text-gray-700 mb-1">
-                        Eligible Offers:
-                      </h5>
-                      <ul className="space-y-2">
-                        {holding.eligibility.map((eligibility, idx) => (
-                          <li key={idx} className="text-xs">
-                            <div className="flex justify-between">
-                              <span className="font-medium">
-                                {eligibility.lenderName}
-                              </span>
-                              <span>
-                                ₹{eligibility.maxLoanAmount.toLocaleString()}
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-gray-500">
-                              <span>{eligibility.loanToValueRatio}% LTV</span>
-                              <span>{eligibility.assetType}</span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+            {/* Holdings List */}
+            <div className="space-y-3">
+              {activeTab === "eligible" ? (
+                eligibleFunds.length > 0 ? (
+                  eligibleFunds.map((fund) => (
+                    <HoldingCard
+                      key={fund.schemeCode}
+                      fund={fund}
+                      expandedHolding={expandedHolding}
+                      toggleHoldingExpansion={toggleHoldingExpansion}
+                      isEligible={true}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    No eligible funds found
+                  </div>
+                )
+              ) : notEligibleFunds.length > 0 ? (
+                notEligibleFunds.map((fund) => (
+                  <HoldingCard
+                    key={fund.schemeCode}
+                    fund={fund}
+                    expandedHolding={expandedHolding}
+                    toggleHoldingExpansion={toggleHoldingExpansion}
+                    isEligible={false}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  No non-eligible funds found
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
           {/* Offers */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-800">Best Offers</h3>
-            {bestOffers.map((offer, index) => {
-              const isSelected = selectedOffer?.lenderId === offer.lenderId;
-              return (
-                <div
-                  key={offer.lenderId}
-                  className={`border rounded-lg p-4 ${
-                    isSelected
-                      ? "border-green-600 bg-green-50"
-                      : "border-gray-200 bg-white"
-                  }`}
-                >
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-bold text-gray-800">
-                      {offer.lenderName}
-                    </h3>
-                    {index === 0 && (
-                      <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                        Best Offer
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm mb-3">
-                    <div>
-                      <p className="text-gray-500">Loan Amount</p>
-                      <p className="font-medium">
-                        ₹{offer.maxLoanAmount.toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Interest Rate</p>
-                      <p className="font-medium">
-                        {offer.interestRateRange.min}% -{" "}
-                        {offer.interestRateRange.max}%
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Processing Fee</p>
-                      <p className="font-medium">{offer.processingFee}%</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Tenure</p>
-                      <p className="font-medium">
-                        {offer.tenureRange.min} - {offer.tenureRange.max} months
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setSelectedOffer(offer)}
-                    className={`w-full py-2 px-4 rounded-lg text-sm font-semibold transition cursor-pointer ${
+          {bestOffers.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-gray-800">Best Offers</h3>
+              {bestOffers.map((offer, index) => {
+                const isSelected = selectedOffer?.lenderId === offer.lenderId;
+                return (
+                  <div
+                    key={offer.lenderId}
+                    className={`border rounded-lg p-4 ${
                       isSelected
-                        ? "bg-green-600 text-white"
-                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                        ? "border-green-600 bg-green-50"
+                        : "border-gray-200 bg-white"
                     }`}
                   >
-                    {isSelected ? "Selected" : "Select Offer"}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-bold text-gray-800">
+                        {offer.lenderName}
+                      </h3>
+                      {index === 0 && (
+                        <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                          Best Offer
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                      <div>
+                        <p className="text-gray-500">Loan Amount</p>
+                        <p className="font-medium">
+                          ₹{offer.maxLoanAmount.toLocaleString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Interest Rate</p>
+                        <p className="font-medium">
+                          {offer.interestRateRange.min}% -{" "}
+                          {offer.interestRateRange.max}%
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Processing Fee</p>
+                        <p className="font-medium">{offer.processingFee}%</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Tenure</p>
+                        <p className="font-medium">
+                          {offer.tenureRange.min} - {offer.tenureRange.max}{" "}
+                          months
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedOffer(offer)}
+                      className={`w-full py-2 px-4 rounded-lg text-sm font-semibold transition cursor-pointer ${
+                        isSelected
+                          ? "bg-green-600 text-white"
+                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                      }`}
+                    >
+                      {isSelected ? "Selected" : "Select Offer"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -481,6 +503,96 @@ const Step6: React.FC<Step6Props> = ({
           </>
         ) : null}
       </div>
+    </div>
+  );
+};
+
+interface HoldingCardProps {
+  fund: Fund;
+  expandedHolding: string | null;
+  toggleHoldingExpansion: (schemeCode: string) => void;
+  isEligible: boolean;
+}
+
+const HoldingCard: React.FC<HoldingCardProps> = ({
+  fund,
+  expandedHolding,
+  toggleHoldingExpansion,
+  isEligible,
+}) => {
+  return (
+    <div
+      key={fund.schemeCode}
+      className="border-b border-gray-100 pb-3 last:border-0 last:pb-0"
+    >
+      <div
+        className="flex justify-between items-center cursor-pointer"
+        onClick={() => toggleHoldingExpansion(fund.schemeCode)}
+      >
+        <div>
+          <h4 className="font-medium text-gray-800">{fund.schemeName}</h4>
+          <p className="text-sm text-gray-500">
+            {fund.units.toFixed(2)} units @ ₹{fund.nav}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="font-medium">₹{fund.currentValue.toLocaleString()}</p>
+          {isEligible ? (
+            fund.eligibility.length > 0 && (
+              <p className="text-xs text-gray-500">
+                {(
+                  (fund.eligibility[0]?.maxLoanAmount / fund.currentValue) *
+                  100
+                ).toFixed(0)}
+                % LTV
+              </p>
+            )
+          ) : (
+            <p className="text-xs text-red-500">
+              {fund.reason || "Not eligible"}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {expandedHolding === fund.schemeCode && (
+        <div className="mt-2 pl-2 border-l-2 border-green-200">
+          {isEligible ? (
+            <>
+              <h5 className="text-sm font-medium text-gray-700 mb-1">
+                Eligible Offers:
+              </h5>
+              <ul className="space-y-2">
+                {fund.eligibility.map((eligibility, idx) => (
+                  <li key={idx} className="text-xs">
+                    <div className="flex justify-between">
+                      <span className="font-medium">
+                        {eligibility.lenderName}
+                      </span>
+                      <span>₹{eligibility.maxLoanAmount.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-500">
+                      <span>{eligibility.loanToValueRatio}% LTV</span>
+                      <span>{eligibility.assetType}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              {fund.lienMarked && (
+                <div className="mt-2 text-xs text-orange-600">
+                  <span className="font-medium">Lien Marked:</span> ₹
+                  {fund.lienMarked.toLocaleString()}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-sm text-gray-600">
+              <p className="font-medium">Reason:</p>
+              <p>{fund.reason || "This fund is not eligible for loans"}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
