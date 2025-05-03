@@ -1,91 +1,266 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-interface Eligibility {
-  lenderId: string;
-  lenderName: string;
-  loanToValueRatio: number;
-  maxLoanAmount: number;
-  assetType: string;
+interface BankDetails {
+  city: string;
+  ifsc: string;
+  micr: string;
+  name: string;
+  branch: string;
+  pincode: string;
+  neftifsc: string;
+  accountNo: string;
+  accountType: string;
 }
 
 interface Fund {
+  age: number;
+  amc: string;
+  nav: string;
+  bank: BankDetails;
+  dpId: string;
+  isin: string;
+  email: string;
+  folio: string;
+  mobile: string;
+  amcName: string;
+  isDemat: string;
+  navDate: string;
+  rtaName: string;
+  gainLoss: string;
+  newFolio: string;
+  planMode: string;
+  purAllow: string;
+  redAllow: string;
+  sipAllow: string;
+  stpAllow: string;
+  swpAllow: string;
+  swtAllow: string;
+  validPan: string;
+  assetType: string;
+  costValue: string;
+  kycStatus: string;
+  taxStatus: string;
+  brokerCode: string;
+  brokerName: string;
+  decimalNav: number;
   schemeCode: string;
   schemeName: string;
-  isin: string;
-  units: number;
-  nav: number;
-  currentValue: number;
-  eligibility: Eligibility[];
-  lienMarked?: number;
-  reason?: string;
+  schemeType: string;
+  decimalUnits: number;
+  investorName: string;
+  schemeOption: string;
+  decimalAmount: number;
+  lienUnitsFlag: string;
+  modeOfHolding: string;
+  nomineeStatus: string;
+  availableUnits: string;
+  closingBalance: string;
+  availableAmount: string;
+  currentMktValue: string;
+  emailRelationship: string;
+  idcwChangeAllowed: string;
+  lienEligibleUnits: string;
+  transactionSource: string;
+  gainLossPercentage: string;
+  mobileRelationship: string;
+}
+
+interface Offer {
+  rateOfInterest: string;
+  totalLoanAmount: number;
+  timeDuration: string;
+  loanProvider: string;
+}
+
+interface Summary {
+  amc: string;
+  amcName: string;
+  isDemat: string;
+  gainLoss: string;
+  costValue: string;
+  currentMktValue: string;
+  gainLossPercentage: string;
 }
 
 interface PortfolioData {
-  totalPortfolioValue: number;
-  totalEligibleValue: number;
-  processedLoanAmount?: number;
+  totalPortfolio: {
+    schemes: Fund[];
+    summary: Summary[];
+  }[];
+  bestOffers: Offer[];
+  otherOffers: Offer[];
   eligibleFunds: Fund[];
-  notEligibleFunds: Fund[];
-  bestOffers: {
-    lenderId: string;
-    lenderName: string;
-    lenderCode: string;
-    maxLoanAmount: number;
-    interestRateRange: {
-      min: number;
-      max: number;
-    };
-    processingFee: number;
-    tenureRange: {
-      min: number;
-      max: number;
-    };
-  }[];
-  summary: {
-    assetType: string;
-    totalValue: number;
-    totalEligibleValue: number;
-    fundCount: number;
-    eligibleFundCount: number;
-    notEligibleFundCount: number;
-    lienMarked?: number;
-  }[];
-  holdings?: Fund[];
+  nonEligibleFunds: Fund[];
 }
 
 interface Step6Props {
-  portfolioData: PortfolioData;
-  onProceed: (selectedOffer: PortfolioData["bestOffers"][0]) => void;
+  onProceed: (selectedOffer: Offer) => void;
   mobileNumber: string;
   sessionId: string;
 }
 
 const Step6: React.FC<Step6Props> = ({
-  portfolioData,
   onProceed,
   mobileNumber,
   sessionId,
 }) => {
-  const allHoldings = portfolioData.holdings || [];
-  const eligibleFunds =
-    portfolioData.eligibleFunds ||
-    allHoldings.filter((h) => h.eligibility.length > 0);
-  const notEligibleFunds =
-    portfolioData.notEligibleFunds ||
-    allHoldings.filter((h) => h.eligibility.length === 0);
-
-  const {
-    totalPortfolioValue,
-    totalEligibleValue,
-    processedLoanAmount,
-    bestOffers = [],
-    summary = [],
-  } = portfolioData;
-
-  const [selectedOffer, setSelectedOffer] = useState<
-    PortfolioData["bestOffers"][0] | null
-  >(null);
+  const [portfolioData, setPortfolioData] = useState<PortfolioData | null>({
+    "totalPortfolio": [
+      {
+        "schemes": [
+          {
+            "age": 36,
+            "amc": "H",
+            "nav": "1197.182",
+            "bank": {
+              "city": "GAUR CITY",
+              "ifsc": "ICIC0007391",
+              "micr": "",
+              "name": "ICICI Bank Ltd",
+              "branch": "GAUR CITY",
+              "pincode": "",
+              "neftifsc": "ICIC0007391",
+              "accountNo": "777701460694",
+              "accountType": "PSB"
+            },
+            "dpId": "",
+            "isin": "INF179K01YV8",
+            "email": "shivani@larktrading.in",
+            "folio": "33959435",
+            "mobile": "+919999460694",
+            "amcName": "HDFC Mutual Fund",
+            "isDemat": "N",
+            "navDate": "29-Apr-2025",
+            "rtaName": "CAMS",
+            "gainLoss": "1996.07",
+            "newFolio": "N",
+            "planMode": "D",
+            "purAllow": "Y",
+            "redAllow": "Y",
+            "sipAllow": "Y",
+            "stpAllow": "Y",
+            "swpAllow": "Y",
+            "swtAllow": "Y",
+            "validPan": "Y",
+            "assetType": "EQUITY",
+            "costValue": "60000.00",
+            "kycStatus": "3",
+            "taxStatus": "01",
+            "brokerCode": "DIRECT",
+            "brokerName": "Direct",
+            "decimalNav": 3,
+            "schemeCode": "44T",
+            "schemeName": "HDFC Large Cap Fund - Direct Plan - Growth Option",
+            "schemeType": "Equity(G)",
+            "decimalUnits": 3,
+            "investorName": "SHIVANI  TAYAL",
+            "schemeOption": "Growth",
+            "decimalAmount": 2,
+            "lienUnitsFlag": "N",
+            "modeOfHolding": "Single",
+            "nomineeStatus": "O",
+            "availableUnits": "51.785",
+            "closingBalance": "51.79",
+            "availableAmount": "61996.07",
+            "currentMktValue": "61996.07",
+            "emailRelationship": "SE",
+            "idcwChangeAllowed": "False",
+            "lienEligibleUnits": "51.785",
+            "transactionSource": "Online",
+            "gainLossPercentage": "3.33",
+            "mobileRelationship": "SE"
+          }
+        ],
+        "summary": [
+          {
+            "amc": "H",
+            "amcName": "HDFC Mutual Fund",
+            "isDemat": "N",
+            "gainLoss": "1996.07",
+            "costValue": "60000.00",
+            "currentMktValue": "61996.07",
+            "gainLossPercentage": "3.33"
+          }
+        ]
+      }
+    ],
+    "bestOffers": [
+      {
+        "rateOfInterest": "4.50 - 36.00%",
+        "totalLoanAmount": 27000,
+        "timeDuration": "12 - 120 months",
+        "loanProvider": "DSP"
+      }
+    ],
+    "otherOffers": [],
+    "eligibleFunds": [
+      {
+        "age": 36,
+        "amc": "H",
+        "nav": "1197.182",
+        "bank": {
+          "city": "GAUR CITY",
+          "ifsc": "ICIC0007391",
+          "micr": "",
+          "name": "ICICI Bank Ltd",
+          "branch": "GAUR CITY",
+          "pincode": "",
+          "neftifsc": "ICIC0007391",
+          "accountNo": "777701460694",
+          "accountType": "PSB"
+        },
+        "dpId": "",
+        "isin": "INF179K01YV8",
+        "email": "shivani@larktrading.in",
+        "folio": "33959435",
+        "mobile": "+919999460694",
+        "amcName": "HDFC Mutual Fund",
+        "isDemat": "N",
+        "navDate": "29-Apr-2025",
+        "rtaName": "CAMS",
+        "gainLoss": "1996.07",
+        "newFolio": "N",
+        "planMode": "D",
+        "purAllow": "Y",
+        "redAllow": "Y",
+        "sipAllow": "Y",
+        "stpAllow": "Y",
+        "swpAllow": "Y",
+        "swtAllow": "Y",
+        "validPan": "Y",
+        "assetType": "EQUITY",
+        "costValue": "60000.00",
+        "kycStatus": "3",
+        "taxStatus": "01",
+        "brokerCode": "DIRECT",
+        "brokerName": "Direct",
+        "decimalNav": 3,
+        "schemeCode": "44T",
+        "schemeName": "HDFC Large Cap Fund - Direct Plan - Growth Option",
+        "schemeType": "Equity(G)",
+        "decimalUnits": 3,
+        "investorName": "SHIVANI  TAYAL",
+        "schemeOption": "Growth",
+        "decimalAmount": 2,
+        "lienUnitsFlag": "N",
+        "modeOfHolding": "Single",
+        "nomineeStatus": "O",
+        "availableUnits": "51.785",
+        "closingBalance": "51.79",
+        "availableAmount": "61996.07",
+        "currentMktValue": "61996.07",
+        "emailRelationship": "SE",
+        "idcwChangeAllowed": "False",
+        "lienEligibleUnits": "51.785",
+        "transactionSource": "Online",
+        "gainLossPercentage": "3.33",
+        "mobileRelationship": "SE"
+      }
+    ],
+    "nonEligibleFunds": []
+  });
+  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [showReportIssue, setShowReportIssue] = useState(false);
   const [issueType, setIssueType] = useState("PORTFOLIO_FETCH_ERROR");
   const [description, setDescription] = useState("");
@@ -93,9 +268,8 @@ const Step6: React.FC<Step6Props> = ({
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedHolding, setExpandedHolding] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"eligible" | "nonEligible">(
-    "eligible"
-  );
+  const [activeTab, setActiveTab] = useState<"eligible" | "nonEligible">("eligible");
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleHoldingExpansion = (schemeCode: string) => {
     setExpandedHolding(expandedHolding === schemeCode ? null : schemeCode);
@@ -106,12 +280,10 @@ const Step6: React.FC<Step6Props> = ({
     setError(null);
 
     try {
-      // Validate issue type
       if (!issueType) {
         throw new Error("Please select an issue type");
       }
 
-      // Validate description
       const trimmedDescription = description.trim();
       if (!trimmedDescription) {
         throw new Error("Please describe the issue");
@@ -123,12 +295,10 @@ const Step6: React.FC<Step6Props> = ({
         throw new Error("Description cannot exceed 500 characters");
       }
 
-      // Validate mobile number
       if (!mobileNumber || !/^\d{10}$/.test(mobileNumber)) {
         throw new Error("Valid mobile number is required");
       }
 
-      // Get and validate SDK credentials
       const sdkCredentials = sessionStorage.getItem("sdkCredentials");
       if (!sdkCredentials) {
         throw new Error("Session expired. Please refresh the page.");
@@ -144,13 +314,11 @@ const Step6: React.FC<Step6Props> = ({
         throw new Error("Invalid session credentials");
       }
 
-      // Validate session ID
       const currentSessionId = sessionId || storedSessionId;
       if (!currentSessionId) {
         throw new Error("Session ID is required");
       }
 
-      // Prepare request data
       const requestData = {
         phone: `+91${mobileNumber}`,
         sessionId: currentSessionId,
@@ -158,7 +326,6 @@ const Step6: React.FC<Step6Props> = ({
         description: trimmedDescription,
       };
 
-      // Make API call
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/loan-sdk/report-issue`,
         requestData,
@@ -171,14 +338,13 @@ const Step6: React.FC<Step6Props> = ({
         }
       );
 
-      // Handle response
       if (response.data?.success) {
         setSubmitSuccess(true);
         setTimeout(() => {
           setShowReportIssue(false);
           setSubmitSuccess(false);
           setDescription("");
-          setIssueType("PORTFOLIO_FETCH_ERROR"); // Reset to default
+          setIssueType("PORTFOLIO_FETCH_ERROR");
         }, 2000);
       } else {
         throw new Error(response.data?.message || "Failed to report issue");
@@ -198,7 +364,6 @@ const Step6: React.FC<Step6Props> = ({
 
   const toggleReportIssue = () => {
     setShowReportIssue(!showReportIssue);
-    // Reset form when opening
     if (!showReportIssue) {
       setIssueType("PORTFOLIO_FETCH_ERROR");
       setDescription("");
@@ -206,9 +371,78 @@ const Step6: React.FC<Step6Props> = ({
     }
   };
 
+  useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        const sdkCredentials = sessionStorage.getItem("sdkCredentials");
+        if (!sdkCredentials) {
+          throw new Error("Session expired. Please refresh the page.");
+        }
+        const { apiKey, apiSecret, sessionId } = JSON.parse(sdkCredentials);
+
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/loan-sdk/get-offers`,
+          {
+            phone: `+91${mobileNumber}`,
+            sessionId: sessionId,
+          },
+          {
+            headers: {
+              "X-SDK-Key": apiKey,
+              "X-SDK-Secret": apiSecret,
+            },
+          }
+        );
+        
+        setPortfolioData(response.data);
+      } catch (error) {
+        console.error("Error fetching offers:", error);
+        setError("Failed to load offers. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOffers();
+  }, [mobileNumber, sessionId]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50 items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+        <p className="mt-4 text-gray-600">Loading offers...</p>
+      </div>
+    );
+  }
+
+  if (!portfolioData) {
+    return (
+      <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50 items-center justify-center p-6">
+        <p className="text-red-500 mb-4">{error || "No offers data available"}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  // Calculate total portfolio value
+  const totalPortfolioValue = portfolioData.totalPortfolio.reduce(
+    (sum, item) => sum + parseFloat(item.summary[0].currentMktValue),
+    0
+  );
+
+  // Calculate total eligible value
+  const totalEligibleValue = portfolioData.eligibleFunds.reduce(
+    (sum, fund) => sum + parseFloat(fund.currentMktValue),
+    0
+  );
+
   return (
     <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50">
-      {/* Scrollable Content - Only show when not reporting an issue */}
       {!showReportIssue && (
         <div className="flex-1 overflow-y-scroll p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">
@@ -233,38 +467,24 @@ const Step6: React.FC<Step6Props> = ({
                   ₹{totalEligibleValue.toLocaleString()}
                 </p>
               </div>
-              {processedLoanAmount && (
-                <div>
-                  <p>Processed Loan Amount</p>
-                  <p className="font-medium text-green-700">
-                    ₹{processedLoanAmount.toLocaleString()}
-                  </p>
-                </div>
-              )}
             </div>
 
-            {summary.length > 0 && (
+            {portfolioData.totalPortfolio.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-sm font-semibold text-gray-700 mb-1">
                   Asset Summary
                 </h4>
                 <div className="bg-gray-50 p-3 rounded-md">
-                  {summary.map((asset, index) => (
+                  {portfolioData.totalPortfolio.map((item, index) => (
                     <div key={index} className="text-sm text-gray-600">
                       <p>
-                        <span className="font-medium">{asset.assetType}:</span>{" "}
-                        {asset.fundCount} funds worth ₹
-                        {asset.totalValue.toLocaleString()} (₹
-                        {asset.totalEligibleValue.toLocaleString()} eligible)
+                        <span className="font-medium">{item.summary[0].amcName}:</span>{" "}
+                        {item.schemes.length} funds worth ₹
+                        {parseFloat(item.summary[0].currentMktValue).toLocaleString()}
                       </p>
                       <p className="text-xs mt-1">
-                        {asset.eligibleFundCount} eligible,{" "}
-                        {asset.notEligibleFundCount} not eligible
-                        {asset.lienMarked ? (
-                          <span>
-                            , ₹{asset.lienMarked.toLocaleString()} lien marked
-                          </span>
-                        ) : null}
+                        {portfolioData.eligibleFunds.length} eligible,{" "}
+                        {portfolioData.nonEligibleFunds.length} not eligible
                       </p>
                     </div>
                   ))}
@@ -275,7 +495,6 @@ const Step6: React.FC<Step6Props> = ({
 
           {/* Holdings Section with Tabs */}
           <div className="border border-gray-200 rounded-lg p-4 bg-white mb-6">
-            {/* Tab Navigation */}
             <div className="flex border-b border-gray-200 mb-3">
               <button
                 className={`py-2 px-4 font-medium ${
@@ -285,7 +504,7 @@ const Step6: React.FC<Step6Props> = ({
                 }`}
                 onClick={() => setActiveTab("eligible")}
               >
-                Eligible Funds ({eligibleFunds.length})
+                Eligible Funds ({portfolioData.eligibleFunds.length})
               </button>
               <button
                 className={`py-2 px-4 font-medium ${
@@ -295,15 +514,14 @@ const Step6: React.FC<Step6Props> = ({
                 }`}
                 onClick={() => setActiveTab("nonEligible")}
               >
-                Non-Eligible Funds ({notEligibleFunds.length})
+                Non-Eligible Funds ({portfolioData.nonEligibleFunds.length})
               </button>
             </div>
 
-            {/* Holdings List */}
             <div className="space-y-3">
               {activeTab === "eligible" ? (
-                eligibleFunds.length > 0 ? (
-                  eligibleFunds.map((fund) => (
+                portfolioData.eligibleFunds.length > 0 ? (
+                  portfolioData.eligibleFunds.map((fund) => (
                     <HoldingCard
                       key={fund.schemeCode}
                       fund={fund}
@@ -317,8 +535,8 @@ const Step6: React.FC<Step6Props> = ({
                     No eligible funds found
                   </div>
                 )
-              ) : notEligibleFunds.length > 0 ? (
-                notEligibleFunds.map((fund) => (
+              ) : portfolioData.nonEligibleFunds.length > 0 ? (
+                portfolioData.nonEligibleFunds.map((fund) => (
                   <HoldingCard
                     key={fund.schemeCode}
                     fund={fund}
@@ -336,14 +554,14 @@ const Step6: React.FC<Step6Props> = ({
           </div>
 
           {/* Offers */}
-          {bestOffers.length > 0 && (
+          {portfolioData.bestOffers.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-gray-800">Best Offers</h3>
-              {bestOffers.map((offer, index) => {
-                const isSelected = selectedOffer?.lenderId === offer.lenderId;
+              {portfolioData.bestOffers.map((offer, index) => {
+                const isSelected = selectedOffer?.loanProvider === offer.loanProvider;
                 return (
                   <div
-                    key={offer.lenderId}
+                    key={`${offer.loanProvider}-${index}`}
                     className={`border rounded-lg p-4 ${
                       isSelected
                         ? "border-green-600 bg-green-50"
@@ -352,7 +570,7 @@ const Step6: React.FC<Step6Props> = ({
                   >
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="font-bold text-gray-800">
-                        {offer.lenderName}
+                        {offer.loanProvider}
                       </h3>
                       {index === 0 && (
                         <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
@@ -365,25 +583,77 @@ const Step6: React.FC<Step6Props> = ({
                       <div>
                         <p className="text-gray-500">Loan Amount</p>
                         <p className="font-medium">
-                          ₹{offer.maxLoanAmount.toLocaleString()}
+                          ₹{offer.totalLoanAmount.toLocaleString()}
                         </p>
                       </div>
                       <div>
                         <p className="text-gray-500">Interest Rate</p>
                         <p className="font-medium">
-                          {offer.interestRateRange.min}% -{" "}
-                          {offer.interestRateRange.max}%
+                          {offer.rateOfInterest}
                         </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Processing Fee</p>
-                        <p className="font-medium">{offer.processingFee}%</p>
                       </div>
                       <div>
                         <p className="text-gray-500">Tenure</p>
                         <p className="font-medium">
-                          {offer.tenureRange.min} - {offer.tenureRange.max}{" "}
-                          months
+                          {offer.timeDuration}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedOffer(offer)}
+                      className={`w-full py-2 px-4 rounded-lg text-sm font-semibold transition cursor-pointer ${
+                        isSelected
+                          ? "bg-green-600 text-white"
+                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                      }`}
+                    >
+                      {isSelected ? "Selected" : "Select Offer"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Other Offers */}
+          {portfolioData.otherOffers.length > 0 && (
+            <div className="space-y-4 mt-6">
+              <h3 className="text-lg font-bold text-gray-800">Other Offers</h3>
+              {portfolioData.otherOffers.map((offer, index) => {
+                const isSelected = selectedOffer?.loanProvider === offer.loanProvider;
+                return (
+                  <div
+                    key={`${offer.loanProvider}-${index}`}
+                    className={`border rounded-lg p-4 ${
+                      isSelected
+                        ? "border-green-600 bg-green-50"
+                        : "border-gray-200 bg-white"
+                    }`}
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-bold text-gray-800">
+                        {offer.loanProvider}
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                      <div>
+                        <p className="text-gray-500">Loan Amount</p>
+                        <p className="font-medium">
+                          ₹{offer.totalLoanAmount.toLocaleString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Interest Rate</p>
+                        <p className="font-medium">
+                          {offer.rateOfInterest}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Tenure</p>
+                        <p className="font-medium">
+                          {offer.timeDuration}
                         </p>
                       </div>
                     </div>
@@ -406,7 +676,7 @@ const Step6: React.FC<Step6Props> = ({
         </div>
       )}
 
-      {/* Report Issue Form - Takes full height when visible */}
+      {/* Report Issue Form */}
       {showReportIssue && (
         <div className="flex-1 overflow-y-scroll p-6">
           <div className="border border-gray-200 rounded-lg p-6 bg-white">
@@ -532,65 +802,49 @@ const HoldingCard: React.FC<HoldingCardProps> = ({
         <div>
           <h4 className="font-medium text-gray-800">{fund.schemeName}</h4>
           <p className="text-sm text-gray-500">
-            {fund.units.toFixed(2)} units @ ₹{fund.nav}
+            {fund.availableUnits} units @ ₹{fund.nav}
           </p>
         </div>
         <div className="text-right">
-          <p className="font-medium">₹{fund.currentValue.toLocaleString()}</p>
+          <p className="font-medium">₹{parseFloat(fund.currentMktValue).toLocaleString()}</p>
           {isEligible ? (
-            fund.eligibility.length > 0 && (
-              <p className="text-xs text-gray-500">
-                {(
-                  (fund.eligibility[0]?.maxLoanAmount / fund.currentValue) *
-                  100
-                ).toFixed(0)}
-                % LTV
-              </p>
-            )
+            <p className="text-xs text-green-500">Eligible</p>
           ) : (
-            <p className="text-xs text-red-500">
-              {fund.reason || "Not eligible"}
-            </p>
+            <p className="text-xs text-red-500">Not eligible</p>
           )}
         </div>
       </div>
 
       {expandedHolding === fund.schemeCode && (
         <div className="mt-2 pl-2 border-l-2 border-green-200">
-          {isEligible ? (
-            <>
-              <h5 className="text-sm font-medium text-gray-700 mb-1">
-                Eligible Offers:
-              </h5>
-              <ul className="space-y-2">
-                {fund.eligibility.map((eligibility, idx) => (
-                  <li key={idx} className="text-xs">
-                    <div className="flex justify-between">
-                      <span className="font-medium">
-                        {eligibility.lenderName}
-                      </span>
-                      <span>₹{eligibility.maxLoanAmount.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-gray-500">
-                      <span>{eligibility.loanToValueRatio}% LTV</span>
-                      <span>{eligibility.assetType}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              {fund.lienMarked && (
-                <div className="mt-2 text-xs text-orange-600">
-                  <span className="font-medium">Lien Marked:</span> ₹
-                  {fund.lienMarked.toLocaleString()}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-sm text-gray-600">
-              <p className="font-medium">Reason:</p>
-              <p>{fund.reason || "This fund is not eligible for loans"}</p>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div>
+              <p className="text-gray-500">AMC</p>
+              <p>{fund.amcName}</p>
             </div>
-          )}
+            <div>
+              <p className="text-gray-500">Investor</p>
+              <p>{fund.investorName}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Cost Value</p>
+              <p>₹{fund.costValue}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Current Value</p>
+              <p>₹{fund.currentMktValue}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Gain/Loss</p>
+              <p className={parseFloat(fund.gainLoss) >= 0 ? "text-green-600" : "text-red-600"}>
+                ₹{fund.gainLoss} ({fund.gainLossPercentage}%)
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Bank Account</p>
+              <p>{fund.bank.name} ({fund.bank.accountNo})</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -25,14 +25,15 @@ const LoanEligibilityFlow = () => {
     setUserIntent(intent);
     // setStep(4);
   };
-
+  console.log("step", step);
   useEffect(() => {
     // Add this to your child application's initialization code
     window.addEventListener("message", (event) => {
       // Always verify the origin for security
       const allowedOrigins = [
         "https://larkfinserv.com",
-        "http://localhost:5173", // for development
+        "http://localhost:3001", // for development
+        "http://localhost:3000", // for development
       ];
 
       if (!allowedOrigins.includes(event.origin)) {
@@ -75,7 +76,12 @@ const LoanEligibilityFlow = () => {
     const theme = params.get("theme");
     const apiKey = params.get("authKey");
     const apiSecret = params.get("authSecret");
-
+    let phoneNumber = params.get("phoneNumber");
+    if (phoneNumber) {
+      phoneNumber = phoneNumber.replace("+91", "");
+      setMobileNumber(phoneNumber);
+      setStep(3);
+    }
     sessionStorage.setItem(
       "sdkCredentials",
       JSON.stringify({
@@ -88,7 +94,6 @@ const LoanEligibilityFlow = () => {
       })
     );
 
-    // console.log("sdkCredentials new", { sessionId, partnerId, userId, theme, apiKey, apiSecret });
     initializeChildApp({
       sessionId,
       partnerId,
@@ -203,7 +208,7 @@ const LoanEligibilityFlow = () => {
         )}
         {step === 6 && portfolioData && (
           <Step6
-            portfolioData={portfolioData}
+            // portfolioData={portfolioData}
             onProceed={() => alert("Proceeding to loan application")}
             mobileNumber={mobileNumber}
             sessionId={childAppConfig?.sessionId}

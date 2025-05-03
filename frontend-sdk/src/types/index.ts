@@ -12,6 +12,7 @@ export type PartnerConfig = {
   userId?: string;
   userData?: Record<string, unknown>;
   sessionId?: string;
+  phoneNumber?: string;
   theme?: {
       primaryColor?: string;
       secondaryColor?: string;

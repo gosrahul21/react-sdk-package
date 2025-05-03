@@ -32,9 +32,13 @@ class LoanEligibilitySDK {
           "Missing required configuration: apiKey and apiSecret are required"
         );
       }
+      let endpoint = `${SDK_API_URL}/loan-sdk/init`;
 
+      if (this.config.phoneNumber) {
+        endpoint = `${endpoint}?phoneNumber=${this.config.phoneNumber}&isVerified=${true}`;
+      }
       // Make API request
-      const response = await axios.get(`${SDK_API_URL}/loan-sdk/init`, {
+      const response = await axios.get(endpoint, {
         headers: {
           "X-SDK-Key": this.config.apiKey,
           "X-SDK-Secret": this.config.apiSecret,
@@ -135,7 +139,6 @@ class LoanEligibilitySDK {
 
     const params = new URLSearchParams();
     params.append("authKey", this.config.apiKey);
-    // params.append("sessionToken", this.sessionToken);
 
     if (this.config.apiSecret) {
       params.append("authSecret", this.config.apiSecret);
@@ -148,6 +151,11 @@ class LoanEligibilitySDK {
     if (this.config.theme) {
       params.append("theme", JSON.stringify(this.config.theme));
     }
+
+    if (this.config.phoneNumber) {
+      params.append("phoneNumber", this.config.phoneNumber);
+    }
+
     return `${baseUrl}?${params.toString()}`;
   }
 
@@ -258,4 +266,3 @@ class LoanEligibilitySDK {
 }
 
 export default LoanEligibilitySDK;
-
