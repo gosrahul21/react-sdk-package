@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import axios from 'axios';
+import { useOtpVerification } from "../hooks/useOtpVerification";
 
 interface Step2Props {
   mobileNumber: string;
@@ -9,71 +8,20 @@ interface Step2Props {
   userExists?: boolean;
 }
 
-export default function Step2({ 
-  mobileNumber, 
-  onSuccess, 
+export default function Step2({
+  mobileNumber,
+  onSuccess,
   onBack,
-  userExists = false 
+  userExists = false,
 }: Step2Props) {
-  const [otp, setOtp] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(30);
-
-  const handleVerifyOtp = async () => {
-    if (otp.length !== 6) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const sdkCredentials = sessionStorage.getItem('sdkCredentials');
-      if (!sdkCredentials) {
-        throw new Error('SDK credentials not found');
-      }
-
-      const { apiKey, apiSecret, sessionId } = JSON.parse(sdkCredentials);
-
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/loan-sdk/verify-otp`,
-        {
-          phone: `+91${mobileNumber}`,
-          sessionId: sessionId,
-          otp: otp,
-        },
-        {
-          headers: {
-            'X-SDK-Key': apiKey,
-            'X-SDK-Secret': apiSecret,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      onSuccess(response.data);
-    } catch (err) {
-      let errorMessage = 'Failed to verify OTP';
-      
-      if (axios.isAxiosError(err)) {
-        errorMessage = err.response?.data?.message || err.message;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    // Implement resend OTP logic here
-    setCountdown(30);
-    // You might want to call the same API as Step1 to resend OTP
-  };
-
-  // Countdown timer effect would go here
-  // useEffect(() => { ... }, [countdown]);
+  const {
+    otp,
+    setOtp,
+    isLoading,
+    countdown,
+    handleVerifyOtp,
+    handleResendOtp,
+  } = useOtpVerification({ mobileNumber, onSuccess });
 
   return (
     <div className="space-y-6">
@@ -132,20 +80,22 @@ export default function Step2({
             />
           </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
-
           <div className="flex justify-between items-center text-sm">
-            <button 
+            <button
               onClick={handleResendOtp}
               disabled={countdown > 0}
-              className={`${countdown > 0 ? 'text-gray-400' : 'text-blue-600 hover:text-blue-800'}`}
+              className={`${
+                countdown > 0
+                  ? "text-gray-400"
+                  : "text-blue-600 hover:text-blue-800"
+              }`}
             >
               Resend OTP
             </button>
             <span className="text-gray-500">
-              {countdown > 0 ? `00:${countdown.toString().padStart(2, '0')}` : ''}
+              {countdown > 0
+                ? `00:${countdown.toString().padStart(2, "0")}`
+                : ""}
             </span>
           </div>
 
@@ -160,14 +110,30 @@ export default function Step2({
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Verifying...
               </span>
             ) : (
-              'Verify OTP'
+              "Verify OTP"
             )}
           </button>
 

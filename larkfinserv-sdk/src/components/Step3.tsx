@@ -1,3 +1,5 @@
+import { useSnackbar } from "notistack";
+
 export default function Step3({
   userIntent,
   handleUserIntent,
@@ -7,6 +9,12 @@ export default function Step3({
   handleUserIntent: (intent: string) => void;
   setStep: (step: number) => void;
 }) {
+  // const { enqueueSnackbar } = useSnackbar();
+
+  const handleIntentSelection = (intent: string) => {
+    handleUserIntent(intent);
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-green-800">
@@ -16,7 +24,7 @@ export default function Step3({
 
       <div className="space-y-3">
         <button
-          onClick={() => handleUserIntent("exploring")}
+          onClick={() => handleIntentSelection("exploring")}
           className={`w-full py-3 px-4 rounded-md border text-left ${
             userIntent === "exploring"
               ? "border-green-500 bg-green-50 cursor-pointer"
@@ -54,7 +62,7 @@ export default function Step3({
         </button>
 
         <button
-          onClick={() => handleUserIntent("future")}
+          onClick={() => handleIntentSelection("future")}
           className={`w-full py-3 px-4 rounded-md border text-left ${
             userIntent === "future"
               ? "border-green-500 bg-green-50 cursor-pointer"
@@ -90,7 +98,7 @@ export default function Step3({
         </button>
 
         <button
-          onClick={() => handleUserIntent("now")}
+          onClick={() => handleIntentSelection("now")}
           className={`w-full py-3 px-4 rounded-md border text-left ${
             userIntent === "now"
               ? "border-green-500 bg-green-50 cursor-pointer"

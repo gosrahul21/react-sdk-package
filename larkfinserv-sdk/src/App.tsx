@@ -9,16 +9,8 @@ import MFCentralResponseStep from "./components/MFCentralResponseStep";
 const LoanEligibilityFlow = () => {
   const [step, setStep] = useState(1);
   const [mobileNumber, setMobileNumber] = useState("");
-  const [otp, setOtp] = useState("");
-  const [userExists, setUserExists] = useState(false);
-  const [_otpSent, setOtpSent] = useState(false);
-  const [_otpVerified, setOtpVerified] = useState(false);
   const [userIntent, setUserIntent] = useState("");
   const [panNumber, setPanNumber] = useState("");
-  const [_panVerified, setPanVerified] = useState(false);
-  const [panMismatch, setPanMismatch] = useState(false);
-  // const [hasInvestments, setHasInvestments] = useState(true);
-  const [lenders, setLenders] = useState<any>([]);
   const [portfolioData, setPortfolioData] = useState<any>();
 
   const handleUserIntent = (intent: string) => {
@@ -77,6 +69,7 @@ const LoanEligibilityFlow = () => {
     const apiKey = params.get("authKey");
     const apiSecret = params.get("authSecret");
     let phoneNumber = params.get("phoneNumber");
+    // if phone number is present, set the mobile number and step to 3
     if (phoneNumber) {
       phoneNumber = phoneNumber.replace("+91", "");
       setMobileNumber(phoneNumber);

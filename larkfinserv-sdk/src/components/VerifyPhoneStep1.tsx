@@ -1,5 +1,4 @@
-import { useState } from "react";
-import axios from "axios";
+import { usePhoneVerification } from "../hooks/usePhoneVerification";
 
 export default function VerifyPhoneStep1({
   onSuccess,
@@ -10,72 +9,10 @@ export default function VerifyPhoneStep1({
   mobileNumber: string;
   setMobileNumber: (mobileNumber: string) => void;
 }) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleCheckEligibility = async () => {
-    if (mobileNumber.length !== 10) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Retrieve credentials from sessionStorage
-      const sdkCredentials = sessionStorage.getItem("sdkCredentials");
-      if (!sdkCredentials) {
-        throw new Error("SDK credentials not found");
-      }
-
-      let { apiKey, apiSecret, sessionId } = JSON.parse(sdkCredentials);
-      // (sdkKey = "sdk_test_6ee7e179854e3528d81425040e7409d8"),
-      //   (sdkSecret = "secret_test_7971810b6de99f626eb580af6c24b5f7");
-      // sessionId = "sdk_1745427431306_4fgm6o5onxk";
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/loan-sdk/verify-phone`,
-        {
-          phone: `+91${mobileNumber}`,
-          sessionId: sessionId,
-        },
-        {
-          headers: {
-            "X-SDK-Key": apiKey,
-            "X-SDK-Secret": apiSecret,
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": true,
-          },
-        }
-      );
-
-      onSuccess(response.data);
-    } catch (err) {
-      let errorMessage = "Failed to verify phone number";
-
-      if (axios.isAxiosError(err)) {
-        // Handle different types of Axios errors
-        if (err.response) {
-          // Server responded with error status
-          errorMessage =
-            err.response.data?.message ||
-            `Server error: ${err.response.status}`;
-        } else if (err.request) {
-          // Request was made but no response received
-          errorMessage =
-            "No response from server. Please check your connection.";
-        } else {
-          // Other Axios errors
-          errorMessage = err.message;
-        }
-      } else if (err instanceof Error) {
-        // Handle our custom error for missing credentials
-        errorMessage = err.message;
-      }
-
-      setError(errorMessage);
-      console.error("Phone verification error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { isLoading, handleCheckEligibility } = usePhoneVerification({
+    mobileNumber,
+    onSuccess,
+  });
 
   return (
     <div className="space-y-6">
@@ -104,8 +41,6 @@ export default function VerifyPhoneStep1({
           maxLength={10}
         />
       </div>
-
-      {error && <div className="text-red-500 text-sm text-center">{error}</div>}
 
       <button
         onClick={handleCheckEligibility}

@@ -35,7 +35,7 @@ class LoanEligibilitySDK {
       let endpoint = `${SDK_API_URL}/loan-sdk/init`;
 
       if (this.config.phoneNumber) {
-        endpoint = `${endpoint}?phoneNumber=${this.config.phoneNumber}&isVerified=${true}`;
+        endpoint = `${endpoint}?phone=${this.config.phoneNumber}&isVerified=${true}`;
       }
       // Make API request
       const response = await axios.get(endpoint, {
