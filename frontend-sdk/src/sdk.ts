@@ -119,6 +119,9 @@ class LoanEligibilitySDK {
         case "CLOSE":
           this.emitEvent("closed");
           break;
+        case "CLOSE_FRAME":
+          this.closeFrame();
+          break;
       }
     });
   }
@@ -166,66 +169,25 @@ class LoanEligibilitySDK {
         "_blank",
         "width=500,height=700,scrollbars=yes"
       );
-
-      // const checkLoaded = setInterval(() => {
-      //   try {
-      //     if (!popupWindow) return;
-
-      //     // Send data securely via postMessage
-      //     popupWindow?.postMessage(
-      //       {
-      //         type: "SDK_INIT",
-      //         config: {
-      //           apiKey: this.config.apiKey,
-      //           apiSecret: this.config.apiSecret,
-      //           partnerId: this.config.partnerId,
-      //           sessionId: this.config.sessionId,
-      //           userId: this.config.userId,
-      //           theme: this.config.theme,
-      //         },
-      //       },
-      //       new URL(this.iframeUrl).origin
-      //     );
-
-      //     clearInterval(checkLoaded);
-      //   } catch (e) {
-      //     // Window not ready yet or closed
-      //     if (popupWindow?.closed) {
-      //       clearInterval(checkLoaded);
-      //       throw new Error("Popup window was closed");
-      //     }
-      //   }
-      // }, 100);
-
+      this.emitEvent("initiated");
       return;
     }
-
-    this.iframe = document.createElement("iframe");
-    this.iframe.src = this.iframeUrl;
-    this.iframe.style.position = "fixed";
-    this.iframe.style.top = "0";
-    this.iframe.style.left = "0";
-    this.iframe.style.width = "40";
-    this.iframe.style.height = "70%";
-    this.iframe.style.border = "none";
-    this.iframe.style.zIndex = "9999";
-    this.iframe.style.backgroundColor = "transparent";
-    this.iframe.setAttribute("allow", "clipboard-write");
-
-    document.body.appendChild(this.iframe);
-    document.body.style.overflow = "scroll";
-
-    // Notify partner that iframe is loading
-    this.emitEvent("initiated");
   }
 
   public closeFrame(): void {
-    if (!this.iframe) return;
-
-    document.body.removeChild(this.iframe);
-    document.body.style.overflow = "";
-    this.iframe = undefined;
-    this.emitEvent("closed");
+    // if (this.iframe) {
+    //   // If the iframe is embedded in the DOM, remove it
+    //   document.body.removeChild(this.iframe);
+    //   document.body.style.overflow = "";
+    //   this.iframe = undefined;
+    //   this.emitEvent("closed");
+    // } else {
+    // If the iframe was opened as a popup, close the popup window
+    const popupWindow = window.open("", "_self");
+    if (popupWindow) {
+      popupWindow.close();
+    }
+    // }
   }
 
   public on(event: SDKEvent, handler: EventHandler): void {

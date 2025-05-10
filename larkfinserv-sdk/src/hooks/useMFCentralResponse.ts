@@ -58,6 +58,9 @@ export function useMFCentralResponse({
       } else if (err instanceof Error) {
         message = err.message;
       }
+      setOtpSession(true);
+      setIsLoading(false);
+      setOtpVerified(true);
       enqueueSnackbar(message, { variant: "error" });
     } finally {
       setIsLoading(false);
@@ -73,11 +76,11 @@ export function useMFCentralResponse({
     }
 
     try {
+      setIsLoading(true);
       const sdkCredentials = sessionStorage.getItem("sdkCredentials");
       if (!sdkCredentials) throw new Error("SDK credentials not found");
 
       const { apiKey, apiSecret, sessionId } = JSON.parse(sdkCredentials);
-
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/loan-sdk/verify-portfolio-otp`,
         { sessionId, otp },
@@ -137,11 +140,11 @@ export function useMFCentralResponse({
     return () => clearInterval(interval);
   }, [otpSession, otpVerified]);
 
-  useEffect(() => {
-    if (otp.length === 6) {
-      verifyPortfolioOtp();
-    }
-  }, [otp]);
+  // useEffect(() => {
+  //   if (otp.length === 6) {
+  //     verifyPortfolioOtp();
+  //   }
+  // }, [otp]);
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
@@ -157,5 +160,6 @@ export function useMFCentralResponse({
     resendTimer,
     handleResendOtp,
     inputRef,
+    verifyPortfolioOtp,
   };
 }

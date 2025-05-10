@@ -1,5 +1,5 @@
 import { useMFCentralResponse } from "../hooks/useMFCentralResponse";
-
+import LoadingButton from "./LoadingButton";
 interface MFCentralResponseStepProps {
   mobileNumber: string;
   panNumber: string;
@@ -23,6 +23,7 @@ export default function MFCentralResponseStep({
     resendTimer,
     handleResendOtp,
     inputRef,
+    verifyPortfolioOtp,
   } = useMFCentralResponse({
     mobileNumber,
     panNumber,
@@ -33,7 +34,7 @@ export default function MFCentralResponseStep({
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-green-800">Investment Check</h2>
 
-      {isLoading ? (
+      {!otpSession ? (
         <div className="flex justify-center items-center">
           <svg
             className="animate-spin h-6 w-6 text-green-600"
@@ -78,17 +79,14 @@ export default function MFCentralResponseStep({
             placeholder="Enter the 6-digit OTP"
             inputMode="numeric"
           />
-          <button
-            onClick={() => {}}
-            disabled={otp.length !== 6}
-            className={`w-full py-2 px-4 rounded-md text-white font-medium ${
-              otp.length === 6
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
+          <LoadingButton
+            onClick={verifyPortfolioOtp}
+            disabled={otp.length !== 6 || isLoading}
+            isLoading={isLoading}
+            loadingText="Verifying OTP..."
           >
             Verify OTP
-          </button>
+          </LoadingButton>
           <div className="flex justify-end">
             <button
               onClick={handleResendOtp}
@@ -116,7 +114,9 @@ export default function MFCentralResponseStep({
             </button>
             <button
               onClick={async () => {
-                await onConfirm();
+                // await onConfirm();
+                console.log("Closing frame");
+                window.parent.postMessage({ type: "CLOSE_FRAME" }, "*");
               }}
               className="w-full py-2 px-4 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700"
             >
