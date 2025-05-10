@@ -1,5 +1,3 @@
-import { useSnackbar } from "notistack";
-
 export default function Step3({
   userIntent,
   handleUserIntent,

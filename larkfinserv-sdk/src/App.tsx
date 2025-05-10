@@ -105,20 +105,20 @@ const LoanEligibilityFlow = () => {
     setChildAppConfig(config);
   };
 
-  const handleFlowComplete = () => {
-    if (window.opener) {
-      // update
-      window.opener.postMessage(
-        {
-          type: "ELIGIBILITY_RESULT",
-          result: { eligible: true, limit: 250000 },
-        },
-        "*"
-      ); // Replace * with actual origin in production
-    } else {
-      alert("Proceeding to loan application");
-    }
-  };
+  // const handleFlowComplete = () => {
+  //   if (window.opener) {
+  //     // update
+  //     window.opener.postMessage(
+  //       {
+  //         type: "ELIGIBILITY_RESULT",
+  //         result: { eligible: true, limit: 250000 },
+  //       },
+  //       "*"
+  //     ); // Replace * with actual origin in production
+  //   } else {
+  //     alert("Proceeding to loan application");
+  //   }
+  // };
 
   const handlePortfolioData = (portfolioData: any) => {
     setPortfolioData(portfolioData);
