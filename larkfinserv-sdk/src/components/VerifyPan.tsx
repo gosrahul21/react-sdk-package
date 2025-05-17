@@ -97,7 +97,7 @@ export default function VerifyPan({
         {onBack && (
           <button
             onClick={onBack}
-            className="w-full py-2 px-4 rounded-md text-gray-700 font-medium border border-gray-300 hover:bg-gray-50"
+            className="w-full py-2 px-4 rounded-md text-gray-700 font-medium border border-gray-300 hover:bg-gray-50 cursor-pointer"
           >
             Back
           </button>

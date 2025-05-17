@@ -164,10 +164,15 @@ class LoanEligibilitySDK {
 
   public openEligibilityCheck(mode: "popup"): void {
     if (mode === "popup") {
+      const width = 500;
+      const height = 700;
+      const left = (window.screen.width - width) / 2;
+      const top = (window.screen.height - height) / 2;
+
       window.open(
         this.iframeUrl,
         "_blank",
-        "width=500,height=700,scrollbars=yes"
+        `width=${width},height=${height},scrollbars=yes,left=${left},top=${top}`
       );
       this.emitEvent("initiated");
       return;

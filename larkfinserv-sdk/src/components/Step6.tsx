@@ -63,7 +63,7 @@ const Step6: React.FC<Step6Props> = ({
         <p className="text-red-500 mb-4">{"No offers data available"}</p>
         <button
           onClick={() => window.location.reload()}
-          className="py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700"
+          className="py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer"
         >
           Retry
         </button>

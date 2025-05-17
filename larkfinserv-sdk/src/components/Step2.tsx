@@ -89,7 +89,7 @@ export default function Step2({
                 countdown > 0
                   ? "text-gray-400"
                   : "text-blue-600 hover:text-blue-800"
-              }`}
+              } cursor-pointer`}
             >
               Resend OTP
             </button>
@@ -112,7 +112,7 @@ export default function Step2({
           {onBack && (
             <button
               onClick={onBack}
-              className="w-full py-2 px-4 rounded-md text-gray-700 font-medium border border-gray-300 hover:bg-gray-50"
+              className="w-full py-2 px-4 rounded-md text-gray-700 font-medium cursor-pointer border border-gray-300 hover:bg-gray-50"
             >
               Back
             </button>

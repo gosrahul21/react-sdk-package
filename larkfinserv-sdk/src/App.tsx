@@ -11,7 +11,6 @@ const LoanEligibilityFlow = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [userIntent, setUserIntent] = useState("");
   const [panNumber, setPanNumber] = useState("");
-  const [portfolioData, setPortfolioData] = useState<any>();
 
   const handleUserIntent = (intent: string) => {
     setUserIntent(intent);
@@ -105,23 +104,7 @@ const LoanEligibilityFlow = () => {
     setChildAppConfig(config);
   };
 
-  // const handleFlowComplete = () => {
-  //   if (window.opener) {
-  //     // update
-  //     window.opener.postMessage(
-  //       {
-  //         type: "ELIGIBILITY_RESULT",
-  //         result: { eligible: true, limit: 250000 },
-  //       },
-  //       "*"
-  //     ); // Replace * with actual origin in production
-  //   } else {
-  //     alert("Proceeding to loan application");
-  //   }
-  // };
-
-  const handlePortfolioData = (portfolioData: any) => {
-    setPortfolioData(portfolioData);
+  const handlePortfolioData = (_data: any) => {
     setStep(6);
   };
 
@@ -199,9 +182,8 @@ const LoanEligibilityFlow = () => {
             onBack={() => setStep(4)}
           />
         )}
-        {step === 6 && portfolioData && (
+        {step === 6 && (
           <Step6
-            // portfolioData={portfolioData}
             onProceed={() => alert("Proceeding to loan application")}
             mobileNumber={mobileNumber}
             sessionId={childAppConfig?.sessionId}

@@ -91,7 +91,7 @@ export default function MFCentralResponseStep({
             <button
               onClick={handleResendOtp}
               disabled={!canResend}
-              className="text-sm text-blue-600 hover:underline disabled:text-gray-400"
+              className="text-sm text-blue-600 hover:underline cursor-pointer disabled:text-gray-400"
             >
               {canResend ? "Resend OTP" : `Resend in ${resendTimer}s`}
             </button>
@@ -108,7 +108,7 @@ export default function MFCentralResponseStep({
           <div className="flex space-x-4">
             <button
               onClick={onBack}
-              className="w-full py-2 px-4 rounded-md border border-gray-300 text-gray-700 font-medium hover:bg-gray-50"
+              className="w-full py-2 px-4 rounded-md border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 cursor-pointer"
             >
               Go Back
             </button>
@@ -118,7 +118,7 @@ export default function MFCentralResponseStep({
                 console.log("Closing frame");
                 window.parent.postMessage({ type: "CLOSE_FRAME" }, "*");
               }}
-              className="w-full py-2 px-4 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700"
+              className="w-full py-2 px-4 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 cursor-pointer"
             >
               Confirm
             </button>
