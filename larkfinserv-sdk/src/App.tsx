@@ -108,6 +108,16 @@ const LoanEligibilityFlow = () => {
     setStep(6);
   };
 
+  const onProceedToLoan = () => {
+    window.opener?.postMessage(
+      {
+        type: "ELIGIBILITY_RESULT",
+        status: "success",
+      },
+      import.meta.env.VITE_SDK_URL 
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-md mx-auto bg-white rounded-xl h-[100vh] shadow-md overflow-hidden p-6">
@@ -184,7 +194,7 @@ const LoanEligibilityFlow = () => {
         )}
         {step === 6 && (
           <Step6
-            onProceed={() => alert("Proceeding to loan application")}
+            onProceed={onProceedToLoan}
             mobileNumber={mobileNumber}
             sessionId={childAppConfig?.sessionId}
           />

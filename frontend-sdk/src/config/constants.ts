@@ -4,4 +4,5 @@ export const SDK_DESCRIPTION = "Loan Eligibility SDK";
 export const SDK_AUTHOR = "Loan Eligibility SDK";
 export const SDK_LICENSE = "MIT";
 export const SDK_URL = "http://localhost:3000";
-export const SDK_API_URL = "https://dev-qa-lark-sdk-backend.larkfinserv.in";
+export const SDK_API_URL = "https://backend-sdk.larkfinserv.in";
+export const LARKFINSERV_ORIGIN_URL = 'http://localhost:3000';

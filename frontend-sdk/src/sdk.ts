@@ -1,4 +1,8 @@
-import { SDK_API_URL, SDK_URL } from "./config/constants";
+import {
+  LARKFINSERV_ORIGIN_URL,
+  SDK_API_URL,
+  SDK_URL,
+} from "./config/constants";
 import {
   PartnerConfig,
   EligibilityResult,
@@ -15,13 +19,14 @@ class LoanEligibilitySDK {
   private iframeUrl: string = "";
   private sessionToken: string = "";
   private static instance: LoanEligibilitySDK | null = null;
+  private childWindow: Window | null = null;
 
   constructor(config: PartnerConfig) {
     this.config = config;
     // this.iframeUrl = this.generateIframeUrl();
     // this.validateConfig();
     this.generateSessionToken();
-    // this.setupMessageListener();  // comment this as of now
+    this.setupMessageListener(); // comment this as of now
   }
 
   public async initialize(config: PartnerConfig): Promise<void> {
@@ -103,6 +108,8 @@ class LoanEligibilitySDK {
   private setupMessageListener(): void {
     window.addEventListener("message", (event) => {
       // In production, check origin
+      // if (event.origin !== LARKFINSERV_ORIGIN_URL) return; // add check for the larkfinserv-sdk hosted url
+      console.log(event.origin, 'oriin')
       const { data } = event;
       if (!data?.type) return;
 
@@ -112,6 +119,7 @@ class LoanEligibilitySDK {
           break;
         case "ELIGIBILITY_RESULT":
           this.emitEvent("completed", data.result as EligibilityResult);
+          this.closeFrame();
           break;
         case "ERROR":
           this.emitEvent("error", data.error as SDKError);
@@ -169,30 +177,23 @@ class LoanEligibilitySDK {
       const left = (window.screen.width - width) / 2;
       const top = (window.screen.height - height) / 2;
 
-      window.open(
+      this.childWindow = window.open(
         this.iframeUrl,
         "_blank",
         `width=${width},height=${height},scrollbars=yes,left=${left},top=${top}`
-      );
+      )!;
       this.emitEvent("initiated");
       return;
     }
   }
 
   public closeFrame(): void {
-    // if (this.iframe) {
-    //   // If the iframe is embedded in the DOM, remove it
-    //   document.body.removeChild(this.iframe);
-    //   document.body.style.overflow = "";
-    //   this.iframe = undefined;
-    //   this.emitEvent("closed");
-    // } else {
     // If the iframe was opened as a popup, close the popup window
-    const popupWindow = window.open("", "_self");
-    if (popupWindow) {
-      popupWindow.close();
+    // const popupWindow = window.open("", "_self");
+    console.log("popup window found");
+    if (this.childWindow) {
+      this.childWindow.close();
     }
-    // }
   }
 
   public on(event: SDKEvent, handler: EventHandler): void {

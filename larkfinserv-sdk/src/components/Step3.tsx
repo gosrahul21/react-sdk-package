@@ -133,7 +133,9 @@ export default function Step3({
       </div>
 
       <button
-        onClick={() => setStep(4)}
+        onClick={() => {
+          setStep(4);
+        }}
         disabled={!userIntent}
         className={`w-full py-2 px-4 rounded-md text-white font-medium ${
           userIntent
