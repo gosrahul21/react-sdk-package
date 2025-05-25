@@ -89,7 +89,7 @@ function App() {
         apiKey: import.meta.env.VITE_SDK_KEY,
         apiSecret: import.meta.env.VITE_SDK_SECRET,
       });
-      sdk.openEligibilityCheck("popup");
+      sdk.openEligibilityCheck("inline");
     } catch (err) {
       setStatus("error");
       setError("Failed to open eligibility check");

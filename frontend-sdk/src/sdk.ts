@@ -98,7 +98,7 @@ class LoanEligibilitySDK {
     window.addEventListener('message', (event) => {
       // In production, check origin
       // if (event.origin !== LARKFINSERV_ORIGIN_URL) return; // add check for the larkfinserv-sdk hosted url
-      console.log(event.origin,event.data ,'origin');
+      console.log(event.origin, event.data, 'origin');
       const { data } = event;
       if (!data?.type) return;
 
@@ -181,71 +181,74 @@ class LoanEligibilitySDK {
       return;
     }
 
-    // if (mode === 'inline') {
-    //   // Create backdrop overlay if it doesn't exist
-    //   let backdrop = document.getElementById(this.containerId + '-backdrop');
-    //   if (!backdrop) {
-    //     backdrop = document.createElement('div');
-    //     backdrop.id = this.containerId + '-backdrop';
-    //     backdrop.style.position = 'fixed';
-    //     backdrop.style.top = '0';
-    //     backdrop.style.left = '0';
-    //     backdrop.style.width = '100vw';
-    //     backdrop.style.height = '100vh';
-    //     backdrop.style.background = 'rgba(0,0,0,0.4)';
-    //     backdrop.style.zIndex = '999';
-    //     backdrop.style.opacity = '0';
-    //     backdrop.style.transition = 'opacity 0.3s';
-    //     document.body.appendChild(backdrop);
-    //     setTimeout(() => {
-    //       backdrop!.style.opacity = '1';
-    //     }, 10);
-    //     backdrop.onclick = () => this.closeFrame();
-    //   }
+    if (mode === 'inline') {
+      // Create backdrop overlay if it doesn't exist
+      let backdrop = document.getElementById(this.containerId + '-backdrop');
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.id = this.containerId + '-backdrop';
+        backdrop.style.position = 'fixed';
+        backdrop.style.top = '0';
+        backdrop.style.left = '0';
+        backdrop.style.width = '100vw';
+        backdrop.style.height = '100vh';
+        backdrop.style.background = 'rgba(0,0,0,0.4)';
+        backdrop.style.zIndex = '999';
+        backdrop.style.opacity = '0';
+        backdrop.style.transition = 'opacity 0.3s';
+        document.body.appendChild(backdrop);
+        setTimeout(() => {
+          backdrop!.style.opacity = '1';
+        }, 10);
+        backdrop.onclick = () => {
+          this.closeFrame();
+          this.emitEvent('CLOSE_FRAME');
+        };
+      }
 
-    //   // Create container if it doesn't exist
-    //   let container = document.getElementById(this.containerId);
-    //   if (!container) {
-    //     container = document.createElement('div');
-    //     container.id = this.containerId;
-    //     container.setAttribute('role', 'dialog');
-    //     container.setAttribute('aria-modal', 'true');
-    //     container.setAttribute('tabindex', '-1');
-    //     container.style.position = 'fixed';
-    //     container.style.top = '50%';
-    //     container.style.left = '50%';
-    //     container.style.transform = 'translate(-50%, -50%)';
-    //     container.style.width = '500px';
-    //     container.style.maxWidth = '95vw';
-    //     container.style.height = '700px';
-    //     container.style.maxHeight = '95vh';
-    //     container.style.backgroundColor = 'white';
-    //     container.style.boxShadow = '0 0 20px rgba(0,0,0,0.3)';
-    //     container.style.zIndex = '1000';
-    //     container.style.borderRadius = '12px';
-    //     container.style.display = 'flex';
-    //     container.style.flexDirection = 'column';
-    //     container.style.opacity = '0';
-    //     container.style.transition = 'opacity 0.3s';
-    //     document.body.appendChild(container);
-    //     setTimeout(() => {
-    //       container!.style.opacity = '1';
-    //     }, 10);
-    //   }
-    //   container.innerHTML = '';
+      // Create container if it doesn't exist
+      let container = document.getElementById(this.containerId);
+      if (!container) {
+        container = document.createElement('div');
+        container.id = this.containerId;
+        container.setAttribute('role', 'dialog');
+        container.setAttribute('aria-modal', 'true');
+        container.setAttribute('tabindex', '-1');
+        container.style.position = 'fixed';
+        container.style.top = '50%';
+        container.style.left = '50%';
+        container.style.transform = 'translate(-50%, -50%)';
+        container.style.width = '500px';
+        container.style.maxWidth = '95vw';
+        container.style.height = '700px';
+        container.style.maxHeight = '95vh';
+        container.style.backgroundColor = 'white';
+        container.style.boxShadow = '0 0 20px rgba(0,0,0,0.3)';
+        container.style.zIndex = '1000';
+        container.style.borderRadius = '12px';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.opacity = '0';
+        container.style.transition = 'opacity 0.3s';
+        document.body.appendChild(container);
+        setTimeout(() => {
+          container!.style.opacity = '1';
+        }, 10);
+      }
+      container.innerHTML = '';
 
-    //   // Create and append iframe
-    //   this.iframe = document.createElement('iframe');
-    //   this.iframe.src = this.iframeUrl;
-    //   this.iframe.style.width = '100%';
-    //   this.iframe.style.height = '100%';
-    //   this.iframe.style.border = 'none';
-    //   this.iframe.style.borderRadius = '12px';
-    //   this.iframe.setAttribute('title', 'Loan Eligibility SDK');
-    //   this.iframe.setAttribute('aria-label', 'Loan Eligibility SDK');
-    //   container.appendChild(this.iframe);
-    //   this.emitEvent('INITIATED');
-    // }
+      // Create and append iframe
+      this.iframe = document.createElement('iframe');
+      this.iframe.src = this.iframeUrl;
+      this.iframe.style.width = '100%';
+      this.iframe.style.height = '100%';
+      this.iframe.style.border = 'none';
+      this.iframe.style.borderRadius = '12px';
+      this.iframe.setAttribute('title', 'Loan Eligibility SDK');
+      this.iframe.setAttribute('aria-label', 'Loan Eligibility SDK');
+      container.appendChild(this.iframe);
+      this.emitEvent('INITIATED');
+    }
   }
 
   private onClosePopupListener(): void {
@@ -265,6 +268,23 @@ class LoanEligibilitySDK {
     if (this.childWindow) {
       this.childWindow.close();
       this.childWindow = null;
+    }
+
+    // Remove inline modal and backdrop
+    const container = document.getElementById(this.containerId);
+    if (container) {
+      // Fade out before removing
+      container.style.opacity = '0';
+      setTimeout(() => {
+        container.remove();
+      }, 300);
+    }
+    const backdrop = document.getElementById(this.containerId + '-backdrop');
+    if (backdrop) {
+      backdrop.style.opacity = '0';
+      setTimeout(() => {
+        backdrop.remove();
+      }, 300);
     }
   }
 
