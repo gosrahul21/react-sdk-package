@@ -64,6 +64,7 @@ export interface Fund {
 }
 
 export interface Offer {
+  index: number;
   rateOfInterest: string;
   totalLoanAmount: number;
   timeDuration: string;

@@ -155,7 +155,13 @@ const Step6: React.FC<Step6Props> = ({
                     </div>
 
                     <button
-                      onClick={() => setSelectedOffer(offer)}
+                      onClick={() =>
+                        setSelectedOffer((prevOffer) =>
+                          prevOffer?.index === index
+                            ? null
+                            : { ...offer, index: index }
+                        )
+                      }
                       className={`w-full py-2 px-4 rounded-lg text-sm font-semibold transition cursor-pointer ${
                         isSelected
                           ? "bg-green-600 text-white"
@@ -410,6 +416,7 @@ const Step6: React.FC<Step6Props> = ({
           <>
             <button
               onClick={() => {
+                console.log("proceeding to loan", selectedOffer);
                 if (selectedOffer) {
                   onProceed(selectedOffer);
                 } else {

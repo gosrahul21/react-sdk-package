@@ -121,14 +121,14 @@ const LoanEligibilityFlow = () => {
         },
       },
     };
-
+    console.log("")
     // Try to send to opener first (popup case)
     if (window.opener) {
-      window.opener.postMessage(message, "*");
+      window.opener.postMessage(message, import.meta.env.VITE_SDK_URL);
     }
 
-    // Also try to send to parent (iframe case)
-    window.parent.postMessage(message, "*");
+    // // Also try to send to parent (iframe case)
+    // window.parent.postMessage(message, "*");
   };
 
   return (
@@ -140,10 +140,11 @@ const LoanEligibilityFlow = () => {
             {[1, 2, 3, 4, 5, 6].map((stepNum) => (
               <div
                 key={stepNum}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= stepNum
-                  ? "bg-green-800 text-white"
-                  : "bg-gray-200 text-gray-600"
-                  }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  step >= stepNum
+                    ? "bg-green-800 text-white"
+                    : "bg-gray-200 text-gray-600"
+                }`}
               >
                 {stepNum}
               </div>
