@@ -1,18 +1,6 @@
 import React from "react";
 import { Fund } from "../types";
 
-interface BankDetails {
-  city: string;
-  ifsc: string;
-  micr: string;
-  name: string;
-  branch: string;
-  pincode: string;
-  neftifsc: string;
-  accountNo: string;
-  accountType: string;
-}
-
 interface HoldingCardProps {
   fund: Fund;
   expandedHolding: string | null;

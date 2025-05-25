@@ -19,9 +19,6 @@ export default function MFCentralResponseStep({
     otp,
     setOtp,
     otpVerified,
-    canResend,
-    resendTimer,
-    handleResendOtp,
     inputRef,
     verifyPortfolioOtp,
   } = useMFCentralResponse({
@@ -87,7 +84,7 @@ export default function MFCentralResponseStep({
           >
             Verify OTP
           </LoadingButton>
-          <div className="flex justify-end">
+          {/* <div className="flex justify-end">
             <button
               onClick={handleResendOtp}
               disabled={!canResend}
@@ -95,7 +92,7 @@ export default function MFCentralResponseStep({
             >
               {canResend ? "Resend OTP" : `Resend in ${resendTimer}s`}
             </button>
-          </div>
+          </div> */}
         </div>
       ) : (
         <>
@@ -116,7 +113,16 @@ export default function MFCentralResponseStep({
               onClick={async () => {
                 // await onConfirm();
                 console.log("Closing frame");
-                window.parent.postMessage({ type: "CLOSE_FRAME" }, "*");
+                window.opener?.postMessage(
+                  {
+                    type: "CLOSE_FRAME",
+                    data: {
+                      message: "No Mutual Fund Investment Found",
+                      status: "Failed",
+                    },
+                  },
+                  import.meta.env.VITE_SDK_URL
+                );
               }}
               className="w-full py-2 px-4 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 cursor-pointer"
             >

@@ -22,6 +22,7 @@ const LoanEligibilityFlow = () => {
     window.addEventListener("message", (event) => {
       // Always verify the origin for security
       const allowedOrigins = [
+        "https://sdk.docsvisory.com",
         "https://larkfinserv.com",
         "http://localhost:3001", // for development
         "http://localhost:3000", // for development
@@ -108,14 +109,26 @@ const LoanEligibilityFlow = () => {
     setStep(6);
   };
 
-  const onProceedToLoan = () => {
-    window.opener?.postMessage(
-      {
-        type: "ELIGIBILITY_RESULT",
-        status: "success",
+  const onProceedToLoan = (selectedOffer: any) => {
+    const message = {
+      type: "ELIGIBILITY_RESULT",
+      data: {
+        mobileNumber,
+        partnerId: childAppConfig?.partnerId,
+        sessionId: childAppConfig?.sessionId,
+        result: {
+          selectedOffer,
+        },
       },
-      import.meta.env.VITE_SDK_URL 
-    );
+    };
+
+    // Try to send to opener first (popup case)
+    if (window.opener) {
+      window.opener.postMessage(message, "*");
+    }
+
+    // Also try to send to parent (iframe case)
+    window.parent.postMessage(message, "*");
   };
 
   return (
@@ -127,11 +140,10 @@ const LoanEligibilityFlow = () => {
             {[1, 2, 3, 4, 5, 6].map((stepNum) => (
               <div
                 key={stepNum}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step >= stepNum
-                    ? "bg-green-800 text-white"
-                    : "bg-gray-200 text-gray-600"
-                }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= stepNum
+                  ? "bg-green-800 text-white"
+                  : "bg-gray-200 text-gray-600"
+                  }`}
               >
                 {stepNum}
               </div>
@@ -197,6 +209,7 @@ const LoanEligibilityFlow = () => {
             onProceed={onProceedToLoan}
             mobileNumber={mobileNumber}
             sessionId={childAppConfig?.sessionId}
+            partnerId={childAppConfig?.partnerId}
           />
         )}
       </div>

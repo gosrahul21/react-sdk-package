@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import LoanEligibilitySDK from "frontend-sdk";
+import type { SDKEvent, SDKMode } from "frontend-sdk/src/types";
 import "./App.css";
 
 // Types for better type safety
@@ -20,53 +21,60 @@ function App() {
         phoneNumber: "+917004572140",
       });
 
-      // sdkInstance.openEligibilityCheck("popup");
-      // Set up event handlers
-      sdkInstance.on("initiated", () => {
+      // Store handler references
+      const initiatedHandler = () => {
         setStatus("loading");
         setMessage("Loading eligibility check...");
-      });
-
-      sdkInstance.on("ready", () => {
+      };
+      const readyHandler = () => {
         setMessage("Please complete the form");
-      });
-
-      sdkInstance.on("completed", (result: any) => {
+      };
+      const resultHandler = (event: SDKEvent) => {
         setStatus("completed");
         setMessage("Eligibility check complete!");
-        console.log("Eligibility result:", result);
-      });
-
-      sdkInstance.on("error", (err: any) => {
+        console.log("Eligibility result:", event.data);
+        // 4 seconds delay
+        setTimeout(() => {
+          //redirect to the url to https://dev-qa-client-portal.larkfinserv.in
+          window.location.href = "https://dev-qa-client-portal.larkfinserv.in";
+        }, 8000);
+      };
+      const errorHandler = (event: SDKEvent) => {
         setStatus("error");
-        setError(err.message || "An error occurred");
+        setError(event.data.error?.message || "An error occurred");
         setMessage("Try Again");
-        console.error("SDK Error:", err);
-      });
-
-      sdkInstance.on("closed", () => {
+        console.error("SDK Error:", event.data.error);
+      };
+      const closeHandler = () => {
         if (status !== "completed") {
           setMessage("Check Eligibility");
           setStatus("idle");
         }
-      });
+      };
+
+      // Add listeners
+      sdkInstance.on("INITIATED", initiatedHandler);
+      sdkInstance.on("READY", readyHandler);
+      sdkInstance.on("ELIGIBILITY_RESULT", resultHandler);
+      sdkInstance.on("ERROR", errorHandler);
+      sdkInstance.on("CLOSE", closeHandler);
 
       setSdk(sdkInstance);
 
+      // Cleanup with stored handlers
       return () => {
-        // Clean up event listeners
-        sdkInstance.off("initiated", () => {});
-        sdkInstance.off("ready", () => {});
-        sdkInstance.off("completed", () => {});
-        sdkInstance.off("error", () => {});
-        sdkInstance.off("closed", () => {});
+        sdkInstance.off("INITIATED", initiatedHandler);
+        sdkInstance.off("READY", readyHandler);
+        sdkInstance.off("ELIGIBILITY_RESULT", resultHandler);
+        sdkInstance.off("ERROR", errorHandler);
+        sdkInstance.off("CLOSE", closeHandler);
       };
     } catch (err) {
       setStatus("error");
       setError("Failed to initialize SDK");
       console.error("Initialization error:", err);
     }
-  }, []);
+  }, [status]); // Add status to dependencies since it's used in closeHandler
 
   const handleClick = async () => {
     if (!sdk) {
@@ -81,7 +89,7 @@ function App() {
         apiKey: import.meta.env.VITE_SDK_KEY,
         apiSecret: import.meta.env.VITE_SDK_SECRET,
       });
-      sdk.openEligibilityCheck("popup");
+      sdk.openEligibilityCheck("inline");
     } catch (err) {
       setStatus("error");
       setError("Failed to open eligibility check");

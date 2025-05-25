@@ -1,25 +1,20 @@
-import {
-  LARKFINSERV_ORIGIN_URL,
-  SDK_API_URL,
-  SDK_URL,
-} from "./config/constants";
-import {
-  PartnerConfig,
-  EligibilityResult,
-  SDKEvent,
-  EventHandler,
-  SDKError,
-} from "./types";
-import axios from "axios";
+import { SDK_API_URL, SDK_URL } from './config/constants';
+
+import { PartnerConfig, SDKEvent, EventHandler, SDKEventData, SDKMode } from './types';
+
+import axios from 'axios';
 
 class LoanEligibilitySDK {
   private config: PartnerConfig;
   private iframe?: HTMLIFrameElement;
-  private eventHandlers: Map<SDKEvent, Set<EventHandler>> = new Map();
-  private iframeUrl: string = "";
-  private sessionToken: string = "";
-  private static instance: LoanEligibilitySDK | null = null;
+  private eventHandlers: Map<string, EventHandler> = new Map();
+  private iframeUrl: string = '';
   private childWindow: Window | null = null;
+  private apiKey: string = '';
+  private apiSecret: string = '';
+  private sessionToken: string = '';
+  private popupWindow: Window | null = null;
+  private containerId: string = 'larkfinserv-sdk-container';
 
   constructor(config: PartnerConfig) {
     this.config = config;
@@ -29,13 +24,11 @@ class LoanEligibilitySDK {
     this.setupMessageListener(); // comment this as of now
   }
 
-  public async initialize(config: PartnerConfig): Promise<void> {
+  public async initialize(_config: PartnerConfig): Promise<void> {
     try {
       // Validate required configuration
       if (!this.config.apiKey || !this.config.apiSecret) {
-        throw new Error(
-          "Missing required configuration: apiKey and apiSecret are required"
-        );
+        throw new Error('Missing required configuration: apiKey and apiSecret are required');
       }
       let endpoint = `${SDK_API_URL}/loan-sdk/init`;
 
@@ -45,20 +38,16 @@ class LoanEligibilitySDK {
       // Make API request
       const response = await axios.get(endpoint, {
         headers: {
-          "X-SDK-Key": this.config.apiKey,
-          "X-SDK-Secret": this.config.apiSecret,
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": true,
+          'X-SDK-Key': this.config.apiKey,
+          'X-SDK-Secret': this.config.apiSecret,
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': true,
         },
         timeout: 10000, // 10 seconds timeout
       });
       // Validate response structure
-      if (
-        !response.data ||
-        !response.data.sessionId ||
-        !response.data.themeConfig
-      ) {
-        throw new Error("Invalid response structure from initialization API");
+      if (!response.data || !response.data.sessionId || !response.data.themeConfig) {
+        throw new Error('Invalid response structure from initialization API');
       }
 
       // Update configuration
@@ -72,17 +61,17 @@ class LoanEligibilitySDK {
 
       this.iframeUrl = this.generateIframeUrl();
     } catch (error: any) {
-      console.log("error", error);
-      let errorMessage = "Failed to initialize SDK";
+      console.log('error', error);
+      let errorMessage = 'Failed to initialize SDK';
 
       if (axios.isAxiosError(error)) {
         // Handle Axios-specific errors
         if (error.response) {
           // Server responded with a status code outside 2xx
-          errorMessage += `: ${error.response.status} - ${error.response.data?.message || "No error message"}`;
+          errorMessage += `: ${error.response.status} - ${error.response.data?.message || 'No error message'}`;
         } else if (error.request) {
           // Request was made but no response received
-          errorMessage += ": No response received from server";
+          errorMessage += ': No response received from server';
         } else {
           // Something happened in setting up the request
           errorMessage += `: ${error.message}`;
@@ -100,34 +89,39 @@ class LoanEligibilitySDK {
   private validateConfig(): void {
     if (!this.config.partnerId) {
       throw new Error(
-        "Missing required configuration: partnerId, partnerName, and authToken are required"
+        'Missing required configuration: partnerId, partnerName, and authToken are required'
       );
     }
   }
 
   private setupMessageListener(): void {
-    window.addEventListener("message", (event) => {
+    window.addEventListener('message', (event) => {
       // In production, check origin
       // if (event.origin !== LARKFINSERV_ORIGIN_URL) return; // add check for the larkfinserv-sdk hosted url
-      console.log(event.origin, 'oriin')
+      console.log(event.origin, 'origin');
       const { data } = event;
       if (!data?.type) return;
 
       switch (data.type) {
-        case "READY":
-          this.emitEvent("ready");
+        case 'READY':
+          this.emitEvent('READY');
           break;
-        case "ELIGIBILITY_RESULT":
-          this.emitEvent("completed", data.result as EligibilityResult);
+        case 'ELIGIBILITY_RESULT':
+          console.log('ELIGIBILITY_RESULT', data);
+          this.emitEvent('ELIGIBILITY_RESULT', data.data);
+          // if not popup then close the frame
           this.closeFrame();
           break;
-        case "ERROR":
-          this.emitEvent("error", data.error as SDKError);
+        case 'ERROR':
+          this.closeFrame();
+          this.emitEvent('ERROR', { error: data.data.error });
           break;
-        case "CLOSE":
-          this.emitEvent("closed");
+        case 'CLOSE':
+          this.closeFrame();
+          this.emitEvent('CLOSE');
           break;
-        case "CLOSE_FRAME":
+        case 'CLOSE_FRAME':
+          this.emitEvent('CLOSE_FRAME', data.data);
           this.closeFrame();
           break;
       }
@@ -146,32 +140,32 @@ class LoanEligibilitySDK {
   }
 
   private generateIframeUrl(): string {
-    const baseUrl = this.config.environment === "sandbox" ? SDK_URL : SDK_URL;
+    const baseUrl = this.config.environment === 'sandbox' ? SDK_URL : SDK_URL;
 
     const params = new URLSearchParams();
-    params.append("authKey", this.config.apiKey);
+    params.append('authKey', this.config.apiKey);
 
     if (this.config.apiSecret) {
-      params.append("authSecret", this.config.apiSecret);
+      params.append('authSecret', this.config.apiSecret);
     }
 
     if (this.config.sessionId) {
-      params.append("sessionId", this.config.sessionId);
+      params.append('sessionId', this.config.sessionId);
     }
 
     if (this.config.theme) {
-      params.append("theme", JSON.stringify(this.config.theme));
+      params.append('theme', JSON.stringify(this.config.theme));
     }
 
     if (this.config.phoneNumber) {
-      params.append("phoneNumber", this.config.phoneNumber);
+      params.append('phoneNumber', this.config.phoneNumber);
     }
 
     return `${baseUrl}?${params.toString()}`;
   }
 
-  public openEligibilityCheck(mode: "popup"): void {
-    if (mode === "popup") {
+  public openEligibilityCheck(mode: SDKMode): void {
+    if (mode === 'popup') {
       const width = 500;
       const height = 700;
       const left = (window.screen.width - width) / 2;
@@ -179,56 +173,160 @@ class LoanEligibilitySDK {
 
       this.childWindow = window.open(
         this.iframeUrl,
-        "_blank",
+        '_blank',
         `width=${width},height=${height},scrollbars=yes,left=${left},top=${top}`
       )!;
-      this.emitEvent("initiated");
+      this.emitEvent('INITIATED');
       return;
+    }
+
+    if (mode === 'inline') {
+      // Create backdrop overlay if it doesn't exist
+      let backdrop = document.getElementById(this.containerId + '-backdrop');
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.id = this.containerId + '-backdrop';
+        backdrop.style.position = 'fixed';
+        backdrop.style.top = '0';
+        backdrop.style.left = '0';
+        backdrop.style.width = '100vw';
+        backdrop.style.height = '100vh';
+        backdrop.style.background = 'rgba(0,0,0,0.4)';
+        backdrop.style.zIndex = '999';
+        backdrop.style.opacity = '0';
+        backdrop.style.transition = 'opacity 0.3s';
+        document.body.appendChild(backdrop);
+        setTimeout(() => {
+          backdrop!.style.opacity = '1';
+        }, 10);
+        backdrop.onclick = () => this.closeFrame();
+      }
+
+      // Create container if it doesn't exist
+      let container = document.getElementById(this.containerId);
+      if (!container) {
+        container = document.createElement('div');
+        container.id = this.containerId;
+        container.setAttribute('role', 'dialog');
+        container.setAttribute('aria-modal', 'true');
+        container.setAttribute('tabindex', '-1');
+        container.style.position = 'fixed';
+        container.style.top = '50%';
+        container.style.left = '50%';
+        container.style.transform = 'translate(-50%, -50%)';
+        container.style.width = '500px';
+        container.style.maxWidth = '95vw';
+        container.style.height = '700px';
+        container.style.maxHeight = '95vh';
+        container.style.backgroundColor = 'white';
+        container.style.boxShadow = '0 0 20px rgba(0,0,0,0.3)';
+        container.style.zIndex = '1000';
+        container.style.borderRadius = '12px';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.opacity = '0';
+        container.style.transition = 'opacity 0.3s';
+        document.body.appendChild(container);
+        setTimeout(() => {
+          container!.style.opacity = '1';
+        }, 10);
+      }
+      container.innerHTML = '';
+
+      // Create and append iframe
+      this.iframe = document.createElement('iframe');
+      this.iframe.src = this.iframeUrl;
+      this.iframe.style.width = '100%';
+      this.iframe.style.height = '100%';
+      this.iframe.style.border = 'none';
+      this.iframe.style.borderRadius = '12px';
+      this.iframe.setAttribute('title', 'Loan Eligibility SDK');
+      this.iframe.setAttribute('aria-label', 'Loan Eligibility SDK');
+      container.appendChild(this.iframe);
+      this.emitEvent('INITIATED');
     }
   }
 
   public closeFrame(): void {
-    // If the iframe was opened as a popup, close the popup window
-    // const popupWindow = window.open("", "_self");
-    console.log("popup window found");
     if (this.childWindow) {
       this.childWindow.close();
     }
-  }
-
-  public on(event: SDKEvent, handler: EventHandler): void {
-    if (!this.eventHandlers.has(event)) {
-      this.eventHandlers.set(event, new Set());
+    // Remove inline modal and backdrop
+    const container = document.getElementById(this.containerId);
+    if (container) {
+      // Fade out before removing
+      container.style.opacity = '0';
+      setTimeout(() => {
+        container.remove();
+      }, 300);
     }
-    this.eventHandlers.get(event)?.add(handler);
+    const backdrop = document.getElementById(this.containerId + '-backdrop');
+    if (backdrop) {
+      backdrop.style.opacity = '0';
+      setTimeout(() => {
+        backdrop.remove();
+      }, 300);
+    }
   }
 
-  public off(event: SDKEvent, handler: EventHandler): void {
-    this.eventHandlers.get(event)?.delete(handler);
+  public on(event: SDKEvent['type'], handler: EventHandler): void {
+    if (!this.eventHandlers.has(event)) {
+      this.eventHandlers.set(event, handler);
+    }
+  }
+
+  public off(event: SDKEvent['type'], _handler: EventHandler): void {
+    this.eventHandlers.delete(event);
   }
 
   public sendData(data: Record<string, unknown>): void {
     if (!this.iframe || !this.iframe.contentWindow) {
-      throw new Error("Eligibility check iframe not open");
+      throw new Error('Eligibility check iframe not open');
     }
 
     this.iframe.contentWindow.postMessage(
       {
-        type: "USER_DATA_UPDATE",
+        type: 'USER_DATA_UPDATE',
         data,
         metadata: {
           partnerId: this.config.partnerId,
           // sessionToken: this.sessionToken,
         },
       },
-      "*"
+      '*'
     ); // In production, specify exact origin
   }
 
-  private emitEvent(event: SDKEvent, data?: any): void {
-    const handlers = this.eventHandlers.get(event);
-    if (handlers) {
-      handlers.forEach((handler) => handler(data));
+  private emitEvent(eventType: SDKEvent['type'], data?: SDKEventData): void {
+    const handler = this.eventHandlers.get(eventType);
+    if (handler) {
+      handler({ type: eventType, data: data || {} });
+    }
+  }
+
+  private handleError(error: Error | unknown) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: {
+          code: 'SDK_ERROR',
+          message: error.message,
+        },
+      };
+    }
+    return {
+      success: false,
+      error: {
+        code: 'SDK_ERROR',
+        message: 'An unknown error occurred',
+      },
+    };
+  }
+
+  private handleCloseMessage(_event: MessageEvent<SDKEvent>): void {
+    if (this.popupWindow) {
+      this.popupWindow.close();
+      this.emitEvent('CLOSE');
     }
   }
 }

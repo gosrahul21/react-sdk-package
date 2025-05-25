@@ -8,12 +8,14 @@ interface Step6Props {
   onProceed: (selectedOffer: Offer) => void;
   mobileNumber: string;
   sessionId: string;
+  partnerId: string;
 }
 
 const Step6: React.FC<Step6Props> = ({
   onProceed,
   mobileNumber,
   sessionId,
+  partnerId,
 }) => {
   const { portfolioData, isLoading } = useFetchOffers({
     mobileNumber,
@@ -46,6 +48,23 @@ const Step6: React.FC<Step6Props> = ({
       setIssueType("PORTFOLIO_FETCH_ERROR");
       setDescription("");
     }
+    window.opener?.postMessage(
+      {
+        type: "ELIGIBILITY_RESULT",
+        status: "success",
+        data: {
+          mobileNumber,
+          partnerId,
+          result: {
+            selectedOffer,
+            sessionId,
+            mobileNumber,
+            partnerId,
+          },
+        },
+      },
+      import.meta.env.VITE_SDK_URL
+    );
   };
 
   if (isLoading) {
@@ -390,15 +409,34 @@ const Step6: React.FC<Step6Props> = ({
         {!showReportIssue ? (
           <>
             <button
-              disabled={!selectedOffer}
-              onClick={() => selectedOffer && onProceed(selectedOffer)}
+              onClick={() => {
+                if (selectedOffer) {
+                  onProceed(selectedOffer);
+                } else {
+                  window.opener?.postMessage(
+                    {
+                      type: "ELIGIBILITY_RESULT",
+                      status: "success",
+                      data: {
+                        mobileNumber,
+                        partnerId,
+                        sessionId,
+                        result: {
+                          message: "User is not eligible for any offer",
+                        },
+                      },
+                    },
+                    import.meta.env.VITE_SDK_URL
+                  );
+                }
+              }}
               className={`w-full py-3 rounded-lg font-semibold transition cursor-pointer mb-2 ${
                 selectedOffer
                   ? "bg-green-600 text-white hover:bg-green-700"
-                  : "bg-green-300 text-gray-600 cursor-not-allowed"
+                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
               }`}
             >
-              Proceed with Application
+              {selectedOffer ? "Proceed with Application" : "Done for now"}
             </button>
 
             <button

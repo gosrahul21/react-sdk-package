@@ -1,8 +1,8 @@
-export const SDK_VERSION = "1.0.0"; 
-export const SDK_NAME = "loan-eligibility-sdk";
-export const SDK_DESCRIPTION = "Loan Eligibility SDK";
-export const SDK_AUTHOR = "Loan Eligibility SDK";
-export const SDK_LICENSE = "MIT";
-export const SDK_URL = "http://localhost:3000";
-export const SDK_API_URL = "https://backend-sdk.larkfinserv.in";
-export const LARKFINSERV_ORIGIN_URL = 'http://localhost:3000';
+export const SDK_VERSION = '1.0.0';
+export const SDK_NAME = 'loan-eligibility-sdk';
+export const SDK_DESCRIPTION = 'Loan Eligibility SDK';
+export const SDK_AUTHOR = 'Loan Eligibility SDK';
+export const SDK_LICENSE = 'MIT';
+export const SDK_URL = 'https://sdk-fe.larkfinserv.in';
+export const SDK_API_URL = 'https://backend-sdk.larkfinserv.in';
+export const LARKFINSERV_ORIGIN_URL = 'https://sdk-fe.larkfinserv.in';
