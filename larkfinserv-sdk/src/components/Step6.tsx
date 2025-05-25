@@ -126,7 +126,9 @@ const Step6: React.FC<Step6Props> = ({
     <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50 py-2">
       {error && (
         <div className="flex flex-col flex-1 max-w-xl mx-auto bg-gray-50 justify-center items-center">
-          <img src="Animation.gif" alt="error" />
+          {error.errorCode === "no_mf_investment" && (
+            <img src="Animation.gif" alt="error" />
+          )}
           <p className="mt-4 text-gray-600 font-bold text-center">
             {error.error}
           </p>
