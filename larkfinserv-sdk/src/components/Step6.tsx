@@ -67,20 +67,6 @@ const Step6: React.FC<Step6Props> = ({
     );
   };
 
-  // if (error) {
-  //   return (
-  //     <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50 items-center">
-  //       {/* <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div> */}
-  //       <img
-  //         className="mt-10"
-  //         src={error.errorCode === "no_mf_investment" ? "Animation.gif" : ""}
-  //         alt="error"
-  //       />
-  //       <p className="mt-4 text-gray-600 font-bold text-center">{error.error}</p>
-  //     </div>
-  //   );
-  // }
-
   if (isLoading) {
     return (
       <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50 items-center justify-center">
@@ -90,7 +76,7 @@ const Step6: React.FC<Step6Props> = ({
     );
   }
 
-  if (!portfolioData) {
+  if (!portfolioData && !error) {
     return (
       <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50 items-center justify-center p-6">
         <p className="text-red-500 mb-4">{"No offers data available"}</p>
@@ -135,7 +121,7 @@ const Step6: React.FC<Step6Props> = ({
         </div>
       )}
 
-      {!showReportIssue && !error && (
+      {!showReportIssue && portfolioData && (
         <div className="flex-1 overflow-y-scroll p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">
             Loan Eligibility & Offers
@@ -266,13 +252,13 @@ const Step6: React.FC<Step6Props> = ({
               <div>
                 <p>Total Portfolio Value</p>
                 <p className="font-medium">
-                  ₹{totalPortfolioValue.toLocaleString()}
+                  ₹{totalPortfolioValue?.toLocaleString()}
                 </p>
               </div>
               <div>
                 <p>Eligible Value</p>
                 <p className="font-medium">
-                  ₹{totalEligibleValue.toLocaleString()}
+                  ₹{totalEligibleValue?.toLocaleString()}
                 </p>
               </div>
             </div>

@@ -49,13 +49,13 @@ export function usePanVerification({
         }
       );
 
-      if (response.data?.status === "mismatch") {
+      if (response.data && response.data.verified) {
+        onSuccess(response.data);
+      } else {
         setPanMismatch(true);
-        enqueueSnackbar("PAN not associated with this phone number", {
+        enqueueSnackbar(response.data.message || "Failed to verify PAN", {
           variant: "error",
         });
-      } else {
-        onSuccess(response.data);
       }
     } catch (err) {
       let errorMessage = "Failed to verify PAN";

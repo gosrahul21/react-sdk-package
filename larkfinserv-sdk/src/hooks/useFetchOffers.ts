@@ -21,50 +21,51 @@ export function useFetchOffers({
     errorCode: string;
     error: string;
   } | null>(null);
-  useEffect(() => {
-    const fetchOffers = async () => {
-      setIsLoading(true);
-      try {
-        const sdkCredentials = sessionStorage.getItem("sdkCredentials");
-        if (!sdkCredentials) {
-          throw new Error("Session expired. Please refresh the page.");
-        }
-        const { apiKey, apiSecret, sessionId } = JSON.parse(sdkCredentials);
 
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/loan-sdk/get-offers`,
-          {
-            phone: `+91${mobileNumber}`,
-            sessionId: sessionId,
-          },
-          {
-            headers: {
-              "X-SDK-Key": apiKey,
-              "X-SDK-Secret": apiSecret,
-            },
-          }
-        );
-        response.data.success
-          ? setPortfolioData(response.data)
-          : setError({
-              errorCode: "no_mf_investment",
-              error: response.data.message,
-            });
-        setPortfolioData(response.data);
-      } catch (error) {
-        console.error("Error fetching offers:", error);
-        enqueueSnackbar("Failed to load offers. Please try again.", {
-          variant: "error",
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "center",
-          },
-        });
-      } finally {
-        setIsLoading(false);
+  const fetchOffers = async () => {
+    setIsLoading(true);
+    try {
+      const sdkCredentials = sessionStorage.getItem("sdkCredentials");
+      if (!sdkCredentials) {
+        throw new Error("Session expired. Please refresh the page.");
       }
-    };
+      const { apiKey, apiSecret, sessionId } = JSON.parse(sdkCredentials);
 
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/loan-sdk/get-offers`,
+        {
+          phone: `+91${mobileNumber}`,
+          sessionId: sessionId,
+        },
+        {
+          headers: {
+            "X-SDK-Key": apiKey,
+            "X-SDK-Secret": apiSecret,
+          },
+        }
+      );
+      response.data.success
+        ? setPortfolioData(response.data)
+        : setError({
+            errorCode: "no_mf_investment",
+            error: response.data.message,
+          });
+      // setPortfolioData(response.data);
+    } catch (error) {
+      console.error("Error fetching offers:", error);
+      enqueueSnackbar("Failed to load offers. Please try again.", {
+        variant: "error",
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchOffers();
   }, [mobileNumber, sessionId]);
 
