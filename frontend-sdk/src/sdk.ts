@@ -180,7 +180,7 @@ class LoanEligibilitySDK {
       this.emitEvent('INITIATED');
       return;
     }
-  
+
     if (mode === 'inline') {
       // Create backdrop overlay if it doesn't exist
       let backdrop = document.getElementById(this.containerId + '-backdrop');
@@ -200,12 +200,12 @@ class LoanEligibilitySDK {
         setTimeout(() => {
           backdrop!.style.opacity = '1';
         }, 10);
-        backdrop.onclick = () => {
-          this.closeFrame();
-          this.emitEvent('CLOSE_FRAME');
-        };
+        // backdrop.onclick = () => {
+        //   this.closeFrame();
+        //   this.emitEvent('CLOSE_FRAME');
+        // };
       }
-  
+
       // Create container if it doesn't exist
       let container = document.getElementById(this.containerId);
       if (!container) {
@@ -236,7 +236,7 @@ class LoanEligibilitySDK {
         }, 10);
       }
       container.innerHTML = '';
-  
+
       // Create header with close button
       const header = document.createElement('div');
       header.style.padding = '10px 15px';
@@ -244,7 +244,7 @@ class LoanEligibilitySDK {
       header.style.justifyContent = 'flex-end';
       header.style.alignItems = 'center';
       header.style.borderBottom = '1px solid #eee';
-  
+
       const closeButton = document.createElement('button');
       closeButton.innerHTML = '&times;'; // Using × symbol
       closeButton.style.background = 'none';
@@ -257,16 +257,16 @@ class LoanEligibilitySDK {
         this.closeFrame();
         this.emitEvent('CLOSE_FRAME');
       });
-  
+
       header.appendChild(closeButton);
       container.appendChild(header);
-  
+
       // Create iframe container
       const iframeContainer = document.createElement('div');
       iframeContainer.style.flex = '1';
       iframeContainer.style.overflow = 'hidden';
       iframeContainer.style.borderRadius = '0 0 12px 12px';
-  
+
       // Create and append iframe
       this.iframe = document.createElement('iframe');
       this.iframe.src = this.iframeUrl;
@@ -275,13 +275,10 @@ class LoanEligibilitySDK {
       this.iframe.style.border = 'none';
       iframeContainer.appendChild(this.iframe);
       container.appendChild(iframeContainer);
-  
+
       this.emitEvent('INITIATED');
     }
   }
-
-
-
 
   private onClosePopupListener(): void {
     // Check periodically if the popup is closed

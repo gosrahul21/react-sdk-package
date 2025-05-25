@@ -49,7 +49,7 @@ const LoanEligibilityFlow = () => {
         });
 
         // Optional: Send acknowledgement back to parent
-        window.opener?.postMessage(
+        window.parent?.postMessage(
           {
             type: "SDK_INIT_ACK",
             status: "success",
@@ -121,10 +121,10 @@ const LoanEligibilityFlow = () => {
         },
       },
     };
-    console.log("")
+    console.log("");
     // Try to send to opener first (popup case)
-    if (window.opener) {
-      window.opener.postMessage(message, import.meta.env.VITE_SDK_URL);
+    if (window.parent) {
+      window.parent.postMessage(message, import.meta.env.VITE_SDK_URL);
     }
 
     // // Also try to send to parent (iframe case)
@@ -181,6 +181,7 @@ const LoanEligibilityFlow = () => {
         {step === 3 && (
           <Step3
             userIntent={userIntent}
+            mobileNumber={mobileNumber}
             handleUserIntent={handleUserIntent}
             setStep={setStep}
           />

@@ -18,6 +18,7 @@ function App() {
       const sdkInstance = new LoanEligibilitySDK({
         apiKey: import.meta.env.VITE_SDK_KEY,
         apiSecret: import.meta.env.VITE_SDK_SECRET,
+        // phoneNumber: "+918825364634",
         phoneNumber: "+917004572140",
       });
 

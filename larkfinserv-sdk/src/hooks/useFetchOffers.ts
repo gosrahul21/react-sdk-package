@@ -17,7 +17,10 @@ export function useFetchOffers({
     null
   );
   const [isLoading, setIsLoading] = useState(false);
-
+  const [error, setError] = useState<{
+    errorCode: string;
+    error: string;
+  } | null>(null);
   useEffect(() => {
     const fetchOffers = async () => {
       setIsLoading(true);
@@ -41,7 +44,12 @@ export function useFetchOffers({
             },
           }
         );
-
+        response.data.success
+          ? setPortfolioData(response.data)
+          : setError({
+              errorCode: "no_mf_investment",
+              error: response.data.message,
+            });
         setPortfolioData(response.data);
       } catch (error) {
         console.error("Error fetching offers:", error);
@@ -60,5 +68,5 @@ export function useFetchOffers({
     fetchOffers();
   }, [mobileNumber, sessionId]);
 
-  return { portfolioData, isLoading };
+  return { portfolioData, isLoading, error };
 }

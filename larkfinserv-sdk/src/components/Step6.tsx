@@ -17,7 +17,7 @@ const Step6: React.FC<Step6Props> = ({
   sessionId,
   partnerId,
 }) => {
-  const { portfolioData, isLoading } = useFetchOffers({
+  const { portfolioData, isLoading, error } = useFetchOffers({
     mobileNumber,
     sessionId,
   });
@@ -48,7 +48,7 @@ const Step6: React.FC<Step6Props> = ({
       setIssueType("PORTFOLIO_FETCH_ERROR");
       setDescription("");
     }
-    window.opener?.postMessage(
+    window.parent?.postMessage(
       {
         type: "ELIGIBILITY_RESULT",
         status: "success",
@@ -66,6 +66,20 @@ const Step6: React.FC<Step6Props> = ({
       import.meta.env.VITE_SDK_URL
     );
   };
+
+  // if (error) {
+  //   return (
+  //     <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50 items-center">
+  //       {/* <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div> */}
+  //       <img
+  //         className="mt-10"
+  //         src={error.errorCode === "no_mf_investment" ? "Animation.gif" : ""}
+  //         alt="error"
+  //       />
+  //       <p className="mt-4 text-gray-600 font-bold text-center">{error.error}</p>
+  //     </div>
+  //   );
+  // }
 
   if (isLoading) {
     return (
@@ -91,13 +105,13 @@ const Step6: React.FC<Step6Props> = ({
   }
 
   // Calculate total portfolio value
-  const totalPortfolioValue = portfolioData.totalPortfolio.reduce(
+  const totalPortfolioValue = portfolioData?.totalPortfolio?.reduce(
     (sum, item) => sum + parseFloat(item.summary[0].currentMktValue),
     0
   );
 
   // Calculate total eligible value
-  const totalEligibleValue = portfolioData.eligibleFunds.reduce(
+  const totalEligibleValue = portfolioData?.eligibleFunds?.reduce(
     (sum, fund) => sum + parseFloat(fund.currentMktValue),
     0
   );
@@ -109,8 +123,17 @@ const Step6: React.FC<Step6Props> = ({
   };
 
   return (
-    <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50">
-      {!showReportIssue && (
+    <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50 py-2">
+      {error && (
+        <div className="flex flex-col flex-1 max-w-xl mx-auto bg-gray-50 justify-center items-center">
+          <img src="Animation.gif" alt="error" />
+          <p className="mt-4 text-gray-600 font-bold text-center">
+            {error.error}
+          </p>
+        </div>
+      )}
+
+      {!showReportIssue && !error && (
         <div className="flex-1 overflow-y-scroll p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">
             Loan Eligibility & Offers
@@ -412,7 +435,7 @@ const Step6: React.FC<Step6Props> = ({
       )}
 
       {/* Footer buttons */}
-      <div className="flex-[0.3] border-t border-gray-300 bg-white p-4 shadow-inner">
+      <div className="flex-[0.3] border-t border-gray-300 bg-white p-4 pt-2 shadow-inner">
         {!showReportIssue ? (
           <>
             <button
@@ -421,7 +444,7 @@ const Step6: React.FC<Step6Props> = ({
                 if (selectedOffer) {
                   onProceed(selectedOffer);
                 } else {
-                  window.opener?.postMessage(
+                  window.parent?.postMessage(
                     {
                       type: "ELIGIBILITY_RESULT",
                       status: "success",
@@ -438,7 +461,7 @@ const Step6: React.FC<Step6Props> = ({
                   );
                 }
               }}
-              className={`w-full py-3 rounded-lg font-semibold transition cursor-pointer mb-2 ${
+              className={`w-full py-3 rounded-lg font-semibold transition flex justify-center cursor-pointer mb-2 ${
                 selectedOffer
                   ? "bg-green-600 text-white hover:bg-green-700"
                   : "bg-gray-200 text-gray-600 hover:bg-gray-300"
@@ -449,7 +472,7 @@ const Step6: React.FC<Step6Props> = ({
 
             <button
               onClick={toggleReportIssue}
-              className="w-full py-2 text-sm text-gray-600 hover:text-gray-800 underline cursor-pointer"
+              className="w-full pb-2 text-sm text-gray-600 hover:text-gray-800 underline cursor-pointer"
             >
               Report an Issue
             </button>

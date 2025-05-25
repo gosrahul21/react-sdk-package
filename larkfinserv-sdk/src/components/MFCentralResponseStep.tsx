@@ -26,7 +26,20 @@ export default function MFCentralResponseStep({
     panNumber,
     onConfirm,
   });
-
+  const closeFrameOnConfirm = () => {
+    // await onConfirm();
+    console.log("Closing frame", window.parent?.postMessage);
+    window?.parent?.postMessage(
+      {
+        type: "CLOSE_FRAME",
+        data: {
+          message: "No Mutual Fund Investment Found",
+          status: "Failed",
+        },
+      },
+      import.meta.env.VITE_SDK_URL
+    );
+  };
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-green-800">Investment Check</h2>
@@ -110,20 +123,7 @@ export default function MFCentralResponseStep({
               Go Back
             </button>
             <button
-              onClick={async () => {
-                // await onConfirm();
-                console.log("Closing frame");
-                window.opener?.postMessage(
-                  {
-                    type: "CLOSE_FRAME",
-                    data: {
-                      message: "No Mutual Fund Investment Found",
-                      status: "Failed",
-                    },
-                  },
-                  import.meta.env.VITE_SDK_URL
-                );
-              }}
+              onClick={closeFrameOnConfirm}
               className="w-full py-2 px-4 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 cursor-pointer"
             >
               Confirm
