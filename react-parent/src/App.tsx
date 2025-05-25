@@ -57,7 +57,7 @@ function App() {
       sdkInstance.on("READY", readyHandler);
       sdkInstance.on("ELIGIBILITY_RESULT", resultHandler);
       sdkInstance.on("ERROR", errorHandler);
-      sdkInstance.on("CLOSE", closeHandler);
+      sdkInstance.on("CLOSE_FRAME", closeHandler);
 
       setSdk(sdkInstance);
 

@@ -98,7 +98,7 @@ class LoanEligibilitySDK {
     window.addEventListener('message', (event) => {
       // In production, check origin
       // if (event.origin !== LARKFINSERV_ORIGIN_URL) return; // add check for the larkfinserv-sdk hosted url
-      console.log(event.origin, 'origin');
+      console.log(event.origin,event.data ,'origin');
       const { data } = event;
       if (!data?.type) return;
 
@@ -266,22 +266,6 @@ class LoanEligibilitySDK {
       this.childWindow.close();
       this.childWindow = null;
     }
-    // Remove inline modal and backdrop
-    // const container = document.getElementById(this.containerId);
-    // if (container) {
-    //   // Fade out before removing
-    //   container.style.opacity = '0';
-    //   setTimeout(() => {
-    //     container.remove();
-    //   }, 300);
-    // }
-    // const backdrop = document.getElementById(this.containerId + '-backdrop');
-    // if (backdrop) {
-    //   backdrop.style.opacity = '0';
-    //   setTimeout(() => {
-    //     backdrop.remove();
-    //   }, 300);
-    // }
   }
 
   public on(event: SDKEvent['type'], handler: EventHandler): void {

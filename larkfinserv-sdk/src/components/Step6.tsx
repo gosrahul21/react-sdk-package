@@ -102,6 +102,12 @@ const Step6: React.FC<Step6Props> = ({
     0
   );
 
+  const selectOffer = (offer: Offer) => {
+    setSelectedOffer((prevOffer) =>
+      prevOffer?.index === offer.index ? null : { ...offer, index: offer.index }
+    );
+  };
+
   return (
     <div className="flex flex-col h-full max-w-xl mx-auto bg-gray-50">
       {!showReportIssue && (
@@ -120,11 +126,12 @@ const Step6: React.FC<Step6Props> = ({
                 return (
                   <div
                     key={`${offer.loanProvider}-${index}`}
-                    className={`border rounded-lg p-4 ${
+                    className={`border rounded-lg p-4 cursor-pointer ${
                       isSelected
                         ? "border-green-600 bg-green-50"
                         : "border-gray-200 bg-white"
                     }`}
+                    onClick={() => selectOffer({ ...offer, index })}
                   >
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="font-bold text-gray-800">
@@ -155,13 +162,7 @@ const Step6: React.FC<Step6Props> = ({
                     </div>
 
                     <button
-                      onClick={() =>
-                        setSelectedOffer((prevOffer) =>
-                          prevOffer?.index === index
-                            ? null
-                            : { ...offer, index: index }
-                        )
-                      }
+                      // onClick={() => selectOffer({ ...offer, index })}
                       className={`w-full py-2 px-4 rounded-lg text-sm font-semibold transition cursor-pointer ${
                         isSelected
                           ? "bg-green-600 text-white"
