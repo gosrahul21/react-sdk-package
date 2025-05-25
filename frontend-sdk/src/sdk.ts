@@ -250,7 +250,9 @@ class LoanEligibilitySDK {
 
   private onClosePopupListener(): void {
     // Check periodically if the popup is closed
+    console.log('onClosePopupListener');
     const interval = setInterval(() => {
+      console.log(this.childWindow, this.childWindow?.closed, 'closing status');
       if (this.childWindow && this.childWindow.closed) {
         clearInterval(interval); // Stop checking once closed
         this.childWindow = null;
